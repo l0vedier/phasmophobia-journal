@@ -31,6 +31,9 @@ WM_HOTKEY = 0x0312
 HOTKEY_ID = 0xB10
 PM_REMOVE = 0x0001
 POLL_INTERVAL = 0.04
+# 失焦后等这么久再确认一次前台。点窗口本身也可能甩出一个 Deactivate
+# （WebView2 子控件的激活抖动），当场就最小化会打成来回，就是「窗口闪烁」。
+HIDE_DELAY = 0.20
 SW_MINIMIZE = 6
 SW_SHOWNOACTIVATE = 4
 SW_RESTORE = 9
@@ -168,6 +171,14 @@ class HotkeyToggle(threading.Thread):
         self._last_iconic = False
         self._taskbar_seen_at = 0.0
         self._taskbar_prev_allowed = False
+        # 点窗口外面就收起：WinForms 的 Deactivate 只记一笔，真正的隐藏由
+        # 轮询线程延迟判断，见 _on_deactivate / _step
+        self._deactivate_hooked = False
+        self._restored_at = 0.0
+        self._first_activated_at = 0.0
+        self._hide_pending_at = 0.0
+        # 刚收起来就别马上再收一次，避免「收了又被弹回来」打成闪烁
+        self._last_hide_at = 0.0
         # 任务栏 / Win+D 等外部最小化也记下矩形；它们不走我们的 minimize()
         try:
             window.events.minimized += self._on_minimized
@@ -212,12 +223,17 @@ class HotkeyToggle(threading.Thread):
         # 无边框窗口默认没有 WS_MINIMIZEBOX，任务栏按钮的最小化命令会被忽略。
         # 每次轮询顺手补上；样式位被改回去时会自动恢复。
         self._ensure_minimize_box(hwnd)
+        if not self._deactivate_hooked:
+            self._ensure_deactivate_hook()
 
         now = time.monotonic()
         iconic = bool(user32.IsIconic(hwnd))
         visible = bool(user32.IsWindowVisible(hwnd))
         fg_self, fg_taskbar, fg_allowed = self._foreground_snapshot(hwnd)
         entered = fg_self and not self._last_fg_self
+
+        # 点了窗口外面：延迟复核后收起
+        self._maybe_hide_pending(now, fg_self, fg_taskbar)
 
         if not self._state_ready:
             self._last_iconic = iconic
@@ -351,6 +367,67 @@ class HotkeyToggle(threading.Thread):
                 self._last_style_log = now
                 log.warning("could not add WS_MINIMIZEBOX", exc_info=True)
 
+    # ---- 点窗口外面就收起 ----
+    def _ensure_deactivate_hook(self) -> None:
+        """把 WinForms 的 Activated / Deactivate 挂上，只在 UI 线程里挂一次。"""
+
+        def attach() -> None:
+            try:
+                form = self._window.native
+                form.Activated += self._on_activated
+                form.Deactivate += self._on_deactivate
+                self._deactivate_hooked = True
+                log.info("deactivate hook attached")
+            except Exception:
+                log.exception("could not attach the deactivate hook")
+
+        self._ui(attach)
+
+    def _on_activated(self, _sender=None, _args=None) -> None:
+        now = time.monotonic()
+        if not self._first_activated_at:
+            self._first_activated_at = now
+
+    def _on_deactivate(self, _sender=None, _args=None) -> None:
+        """窗口失焦（点了别的程序或桌面空白处）就排一次收起。
+
+        这里只记时间戳，真正最小化交给轮询线程等 HIDE_DELAY 之后再确认：
+        点窗口自身也可能触发一次 Deactivate（激活在窗体和 WebView2 子控件
+        之间抖一下），当场就收会和紧跟着的 Activate 打成来回，表现为
+        窗口疯狂闪烁。晚 200 毫秒看一眼前台，抖动自己就过去了。
+
+        三个例外，否则会把功能弄坏：
+        - 点到任务栏：交给任务栏那套逻辑，不然按钮会点不动；
+        - 切到游戏：笔记本来就是压在游戏上的悬浮层，收了就没法边玩边看；
+        - 刚打开或刚被 Ctrl+J 叫回来的那一瞬间，别一落地就被收掉。
+        """
+        if self._stop_event.is_set() or not self._hwnd or self._hide_pending_at:
+            return
+        now = time.monotonic()
+        if now - self._restored_at < 0.35:
+            return
+        if not self._first_activated_at or now - self._first_activated_at < 1.2:
+            return
+        if now - self._last_hide_at < 0.5:
+            return
+        if user32.IsIconic(self._hwnd) or not user32.IsWindowVisible(self._hwnd):
+            return
+        self._hide_pending_at = now
+
+    def _maybe_hide_pending(self, now: float, fg_self: bool, fg_taskbar: bool) -> None:
+        """Deactivate 排下的收起，到这里复核一次再动手。"""
+        if not self._hide_pending_at or now - self._hide_pending_at < HIDE_DELAY:
+            return
+        self._hide_pending_at = 0.0
+        hwnd = self._hwnd
+        if not hwnd or user32.IsIconic(hwnd) or not user32.IsWindowVisible(hwnd):
+            return
+        if fg_self or fg_taskbar or self.game_foreground():
+            return
+        log.info("deactivate -> hide")
+        self._last_hide_at = now
+        self._ui(self._minimize_on_ui)
+
     def _cursor_over_taskbar(self) -> bool:
         pt = wintypes.POINT()
         if not user32.GetCursorPos(ctypes.byref(pt)):
@@ -461,6 +538,8 @@ class HotkeyToggle(threading.Thread):
         hwnd = self._hwnd
         if not hwnd:
             return
+        # 记一笔：刚叫回来的时候 Windows 可能补一个 Deactivate，别立刻又收回去
+        self._restored_at = time.monotonic()
         if self._saved_rect is None:
             # 外部最小化时没经过 _minimize_on_ui，最小化状态下也能取到原矩形
             self._capture_placement()

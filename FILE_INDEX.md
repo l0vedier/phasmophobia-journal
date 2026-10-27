@@ -12,7 +12,7 @@
 | `version.py` | 名称与版本号的唯一来源：`APP_NAME_BASE` + `APP_VERSION`；窗口标题和打包名称都从这里取 |
 | `applog.py` | 滚动日志：`%APPDATA%\PhasmophobiaJournal\journal.log`（512 KB × 2 份备份） |
 | `layout.py` | 窗口/书壳几何常量，`main.py` 与真实窗口测试共用 |
-| `hotkey.py` | 全局 Ctrl+J：最小化 / 唤回；动态置顶；补 `WS_MINIMIZEBOX` 让任务栏按钮能最小化；任务栏第一次点击直接隐藏置顶笔记；保存并还原最小化前的窗口矩形 |
+| `hotkey.py` | 全局 Ctrl+J：最小化 / 唤回；动态置顶；补 `WS_MINIMIZEBOX` 让任务栏按钮能最小化；任务栏第一次点击直接隐藏置顶笔记；点窗口外面就收起（Deactivate 延迟 0.2s 复核）；保存并还原最小化前的窗口矩形 |
 | `ghost_info.py` | 只读解析鬼魂资料 md：鬼魂、通用规则、诅咒之物（含 `###` 子项）；优先用程序/exe 旁的 `资料\恐鬼症_鬼魂数据_分鬼版.md`，找不到才回退 `D:\game_timer\资料\...` |
 | `app/index.html` | 界面结构（HTML）：左页证据 + 鬼魂通用规则 + 诅咒之物规则，右页鬼名 + 鬼魂详情 + 诅咒之物名录/详情；样式和脚本拆到下面两个文件 |
 | `app/styles.css` | 全部界面样式：cqh/vw 布局、皮面书壳、通用规则页、诅咒之物页、淡入淡出、翻页动画 |
@@ -293,6 +293,18 @@ crossed --左键--> normal
   - **热键线程的停止事件叫 `_stop_event`，绝不能叫 `_stop`**：`threading.Thread` 自己有
     内部方法 `_stop()`，重名会让 `join()` 抛 `TypeError: 'Event' object is not callable`
     （2026-10-18 实际踩过，已修）。
+- **点窗口外面就收起（2026-10-28）**：挂 WinForms 的 `Form.Activated` / `Form.Deactivate`
+  （`_ensure_deactivate_hook`，只在 UI 线程挂一次）。**Deactivate 里只记时间戳
+  `_hide_pending_at`，真正最小化交给轮询线程 `_maybe_hide_pending` 等 `HIDE_DELAY=0.20s`
+  后复核**——一开始是当场 `SW_MINIMIZE`，结果点窗口自身时激活会在窗体和 WebView2 子控件
+  之间抖一下，立刻收和紧接着的 Activate 打成来回，用户看到的是**窗口疯狂闪烁**。延迟复核
+  顺手还挡掉了「刚收又被弹回来」的情况（另有 `_last_hide_at` 0.5s 冷却）。
+  三个例外：**任务栏**（交给任务栏那套逻辑，否则按钮点不动）、**游戏在前台**
+  （笔记是压在游戏上的悬浮层，收了就没法边玩边看）、**刚启动/刚被 Ctrl+J 叫回来的
+  1.2s / 0.35s 宽限期**。复核时用轮询线程里的 `fg_self / fg_taskbar / game_foreground()`
+  三个判据，都没命中才 `self._ui(self._minimize_on_ui)`。
+  验证记录：切到别的程序 → 0.2s 后收起；Ctrl+J → 叫回且焦点在笔记上；再切走 → 再收起；
+  点笔记正文（含书脊）不触发任何收起。
 - **任务栏按钮能真正隐藏（根因）**：pywebview 的无边框窗口默认没有 `WS_MINIMIZEBOX`，
   点活动窗口的任务栏按钮时 Windows 发出的最小化命令会被直接忽略，看起来就是“点了没反应”。
   `hotkey.py` 每 40ms 检查窗口样式，缺了就补上（不改变外观，也没有标题栏按钮）；
