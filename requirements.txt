@@ -1,0 +1,6 @@
+# 运行环境（Windows）
+pywebview==6.2.1
+pythonnet==3.1.0
+
+# 真实窗口测试用 ImageGrab
+Pillow==11.3.0

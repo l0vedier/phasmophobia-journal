@@ -1,0 +1,19 @@
+# 从游戏里解包出来的原始资源，体积大且不能公开
+extracted/
+
+# 构建产物
+dist/
+build/
+*.spec
+
+# 本地备份 / 缓存
+.backup/
+legacy/
+__pycache__/
+*.pyc
+*.pyo
+
+# 临时文件
+tools/_asset_preview/
+_tmp_dl/
+*.log

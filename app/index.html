@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>恐鬼症笔记 v1.2</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<main class="desk">
+  <section class="book" id="book" aria-label="恐鬼症证据笔记">
+    <div class="cover-wear" aria-hidden="true"></div>
+    <div class="cover-emboss" aria-hidden="true"></div>
+    <div class="page-block-frame" aria-hidden="true"></div>
+    <div class="page-surface">
+      <img class="book-sprite" src="assets/book_spread.png" alt="" draggable="false">
+      <div class="paper-wash" aria-hidden="true"></div>
+      <div class="paper-stains" aria-hidden="true"></div>
+      <div class="book-depth" aria-hidden="true"></div>
+      <div class="spine-shade" aria-hidden="true"></div>
+      <div class="spine-light" aria-hidden="true"></div>
+      <div class="page-block" aria-hidden="true"></div>
+    </div>
+
+    <div class="book-drag pywebview-drag-region" aria-hidden="true"></div>
+
+    <div class="page page-left" id="pageLeft">
+      <div class="title-block">
+        <h1 class="page-title">证据</h1>
+        <svg class="title-rule" viewBox="0 0 300 8" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M2 5 C 45 3.4, 92 5.6, 140 4.2 S 232 5.2, 298 3.8"/>
+        </svg>
+      </div>
+
+      <ul class="evidence-list" id="evidenceList"></ul>
+
+      <div class="page-foot">左键：勾选/圈住 → 划除</div>
+
+      <div class="common-panel" id="commonPanel">
+        <div class="title-block">
+          <h1 class="page-title">通用规则</h1>
+          <svg class="title-rule" viewBox="0 0 300 8" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M2 4.6 C 50 5.8, 98 3.5, 148 4.7 S 244 5.2, 298 4.1"/>
+          </svg>
+        </div>
+        <div class="common-body" id="commonBody" tabindex="0"></div>
+      </div>
+
+      <div class="cursed-panel" id="cursedPanel">
+        <div class="title-block">
+          <h1 class="page-title">诅咒之物</h1>
+          <svg class="title-rule" viewBox="0 0 300 8" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M2 4.3 C 46 5.7, 100 3.4, 150 4.8 S 246 5.4, 298 4.0"/>
+          </svg>
+          <p class="panel-sub">通用规则</p>
+        </div>
+        <div class="common-body cursed-body" id="cursedBody" tabindex="0"></div>
+        <button class="page-turn" id="cursedBack" type="button" title="返回鬼魂名单">← 返回鬼魂名单</button>
+      </div>
+    </div>
+
+    <div class="page page-right" id="pageRight">
+      <div class="title-block">
+        <h1 class="page-title">证据</h1>
+        <svg class="title-rule" viewBox="0 0 300 8" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M2 4.4 C 52 5.8, 96 3.6, 148 4.6 S 244 3.8, 298 4.9"/>
+        </svg>
+      </div>
+
+      <p class="hint">根据我们找到的证据，这种鬼可能是</p>
+
+      <div class="ghost-area" id="ghostArea">
+        <div class="ghost-grid" id="ghostGrid"></div>
+        <svg class="circle-layer" id="circleLayer" aria-hidden="true"></svg>
+      </div>
+
+      <div class="page-bottom">
+        <button class="reset-btn" id="resetBtn" type="button" title="恢复初始状态（Esc）">重置</button>
+        <button class="page-turn" id="ghostNextBtn" type="button" title="翻到诅咒之物">下一页：诅咒之物 →</button>
+      </div>
+
+      <div class="ghost-detail" id="ghostDetail">
+        <div class="detail-head">
+          <h2 class="detail-title" id="detailTitle"></h2>
+          <button class="detail-back" id="detailBack" type="button" title="返回鬼名列表（Esc）">← 返回鬼名</button>
+        </div>
+        <p class="detail-sub" id="detailSub"></p>
+        <svg class="detail-rule" viewBox="0 0 300 8" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M2 4.8 C 48 3.2, 100 5.9, 152 4.4 S 246 5.1, 298 3.9"/>
+        </svg>
+        <div class="detail-body" id="detailBody" tabindex="0"></div>
+      </div>
+
+      <div class="cursed-list" id="cursedList">
+        <div class="title-block">
+          <h1 class="page-title">诅咒之物</h1>
+          <svg class="title-rule" viewBox="0 0 300 8" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M2 4.6 C 50 3.4, 98 5.7, 148 4.3 S 244 5.3, 298 4.1"/>
+          </svg>
+        </div>
+        <p class="hint">每局随机一件，选择名字查看介绍</p>
+        <div class="cursed-names" id="cursedNames"></div>
+      </div>
+
+      <div class="cursed-detail" id="cursedDetail">
+        <div class="detail-head">
+          <h2 class="detail-title" id="cursedDetailTitle"></h2>
+          <button class="detail-back" id="cursedDetailBack" type="button" title="返回诅咒之物名录（Esc）">← 返回名录</button>
+        </div>
+        <p class="detail-sub" id="cursedDetailSub"></p>
+        <svg class="detail-rule" viewBox="0 0 300 8" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M2 4.8 C 48 3.2, 100 5.9, 152 4.4 S 246 5.1, 298 3.9"/>
+        </svg>
+        <div class="detail-body" id="cursedDetailBody" tabindex="0"></div>
+      </div>
+    </div>
+
+    <div class="chrome" role="toolbar" aria-label="窗口控制">
+      <button id="btnClose" type="button" title="关闭" aria-label="关闭">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M1.2 1.2 C 8.2 8.2, 15.8 15.8, 22.8 22.8 M22.8 1.2 C 15.8 8.2, 8.2 15.8, 1.2 22.8"/>
+        </svg>
+      </button>
+    </div>
+  </section>
+</main>
+
+<script src="ghost_info.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1144 @@
+  @font-face {
+    font-family: "LongCang";
+    src: url("assets/LongCang-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: block;
+  }
+
+  :root {
+    --ink: #2a1709;
+    --ink-soft: #4a301a;
+    --ink-mid: #5b3d22;
+    --paper: #f7f1d9;
+    --chrome-ink: #e8d7b6;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    height: 100%;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  body {
+    font-family: "LongCang", "KaiTi", "STKaiti", "FangSong", serif;
+    color: var(--ink);
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- 桌面：窗口透明，只留书页 ---------- */
+  .desk {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ---------- 摊开的书 ---------- */
+  .book {
+    position: relative;
+    width: min(94vw, calc(91vh * 1.25175));
+    aspect-ratio: 895 / 715;
+    container-type: size;
+    /* 整块皮面书壳：圆角比例要和 main.py 的 COVER_RADIUS 一致 */
+    border-radius: 1.15%;
+    overflow: hidden;
+    background-color: #2f1c10;
+    /* leather.png 本身偏浅，压一层深棕渐变才像深色皮面，纹理仍透出来 */
+    background-image:
+      linear-gradient(148deg, rgba(96, 56, 30, .84), rgba(30, 17, 8, .93)),
+      url("assets/leather.png");
+    background-size: cover, cover;
+    background-position: center, center;
+    box-shadow: inset 0 0 0 1px rgba(12, 6, 2, .55);
+    animation: book-in .55s cubic-bezier(.2, .8, .2, 1) both;
+  }
+
+  /* ---------- 皮面书壳 / 页层 / 纸面 ---------- */
+  .cover-wear,
+  .cover-emboss,
+  .page-block-frame,
+  .page-surface {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  /* 皮革的光照和磨白边角 */
+  .cover-wear {
+    inset: 0;
+    z-index: 0;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(255, 215, 165, .13), transparent 52%),
+      radial-gradient(ellipse at 78% 90%, rgba(0, 0, 0, .30), transparent 58%),
+      linear-gradient(135deg, rgba(255, 255, 255, .04), transparent 35%),
+      linear-gradient(315deg, rgba(0, 0, 0, .20), transparent 48%),
+      radial-gradient(circle at 0% 0%, rgba(235, 200, 150, .20), transparent 7%),
+      radial-gradient(circle at 100% 0%, rgba(235, 200, 150, .14), transparent 6%),
+      radial-gradient(circle at 0% 100%, rgba(235, 200, 150, .14), transparent 7%),
+      radial-gradient(circle at 100% 100%, rgba(235, 200, 150, .18), transparent 7%);
+  }
+
+  /* 压印边线：一深一浅，像皮面上的压痕 */
+  .cover-emboss {
+    inset: .55%;
+    z-index: 0;
+    border: 1px solid rgba(12, 6, 2, .62);
+    border-radius: 1%;
+    box-shadow:
+      0 0 0 1px rgba(226, 192, 142, .10),
+      inset 0 0 0 1px rgba(226, 192, 142, .08);
+  }
+
+  /* 书壳与纸面之间的页层厚度 */
+  .page-block-frame {
+    inset: 1.0%;
+    z-index: 1;
+    border-radius: 1%;
+    background-color: #d9c29a;
+    background-image:
+      linear-gradient(90deg, rgba(40, 22, 8, .16), transparent 14%, transparent 86%, rgba(40, 22, 8, .16)),
+      repeating-linear-gradient(
+        180deg,
+        rgba(96, 62, 30, 0) 0 1.3px,
+        rgba(96, 62, 30, .16) 1.3px 2.1px
+      );
+    box-shadow:
+      inset 0 0 7px rgba(40, 22, 8, .30),
+      0 0 10px rgba(0, 0, 0, .28);
+  }
+
+  /* 内页整体内缩，边缘投影落在页层上，看起来嵌进书壳 */
+  .page-surface {
+    inset: 2.3%;
+    z-index: 2;
+    /* 用 box-shadow 代替 filter: drop-shadow：filter 会把整块书页合并成一个
+       渲染层，鼠标划过证据行时整页都要重绘，核显上很容易掉帧。 */
+    box-shadow: 0 1px 3px rgba(24, 12, 4, .55);
+  }
+
+  @keyframes book-in {
+    from { opacity: 0; transform: translateY(12px) scale(.985); }
+    to   { opacity: 1; transform: none; }
+  }
+
+  .book-sprite {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    pointer-events: none;
+    -webkit-user-drag: none;
+  }
+
+  .paper-wash,
+  .paper-stains,
+  .spine-shade,
+  .book-depth,
+  .spine-light,
+  .page-block {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    -webkit-mask-image: url("assets/book_spread.png");
+    -webkit-mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-image: url("assets/book_spread.png");
+    mask-size: 100% 100%;
+    mask-repeat: no-repeat;
+  }
+
+  .paper-wash {
+    z-index: 1;
+    background-image: url("assets/parchment_tile.png");
+    background-size: 290px 290px;
+    mix-blend-mode: multiply;
+    opacity: .38;
+  }
+
+  .paper-stains {
+    z-index: 2;
+    background:
+      radial-gradient(ellipse at 16% 18%, rgba(117, 72, 27, .10), transparent 34%),
+      radial-gradient(ellipse at 82% 74%, rgba(117, 72, 27, .09), transparent 38%),
+      radial-gradient(ellipse at 62% 10%, rgba(90, 52, 18, .06), transparent 28%);
+    mix-blend-mode: multiply;
+  }
+
+  .spine-shade {
+    inset: 0 auto 0 46.5%;
+    width: 9%;
+    z-index: 3;
+    background: linear-gradient(
+      90deg,
+      rgba(60, 35, 12, 0) 0%,
+      rgba(60, 35, 12, .05) 24%,
+      rgba(48, 26, 9, .18) 45%,
+      rgba(42, 23, 9, .30) 50%,
+      rgba(42, 23, 9, .34) 51.5%,
+      rgba(54, 30, 11, .10) 62%,
+      rgba(60, 35, 12, .04) 78%,
+      rgba(60, 35, 12, 0) 100%
+    );
+    mix-blend-mode: multiply;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  /* 页缘内阴影 + 下角卷曲：让纸面像有厚度和弧度，不再是纯平面 */
+  .book-depth {
+    z-index: 2;
+    background:
+      linear-gradient(90deg, rgba(56, 32, 11, .30) 0%, rgba(56, 32, 11, .10) 1.2%, transparent 3.4%),
+      linear-gradient(270deg, rgba(56, 32, 11, .30) 0%, rgba(56, 32, 11, .10) 1.2%, transparent 3.4%),
+      linear-gradient(180deg, rgba(56, 32, 11, .22) 0%, transparent 2.6%),
+      linear-gradient(0deg, rgba(46, 25, 8, .34) 0%, rgba(46, 25, 8, .12) 1.8%, transparent 4.2%),
+      radial-gradient(ellipse at 0% 100%, rgba(56, 32, 11, .20), transparent 26%),
+      radial-gradient(ellipse at 100% 100%, rgba(56, 32, 11, .20), transparent 26%),
+      linear-gradient(90deg, rgba(56, 32, 11, .08), transparent 16%, transparent 84%, rgba(56, 32, 11, .08));
+    mix-blend-mode: multiply;
+  }
+
+  /* 顶部受光 + 折痕右侧的纸面高光（soft-light 只提亮，不冲淡文字） */
+  .spine-light {
+    z-index: 3;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(255, 249, 230, .28), transparent 60%),
+      linear-gradient(
+        90deg,
+        transparent 50.6%,
+        rgba(255, 249, 230, .05) 51.1%,
+        rgba(255, 249, 230, .17) 51.8%,
+        rgba(255, 249, 230, .06) 53.4%,
+        transparent 56.2%
+      );
+    mix-blend-mode: soft-light;
+  }
+
+  /* 底边页层：几道极淡的横向细线，像一叠纸的侧边 */
+  .page-block {
+    z-index: 3;
+    background-image: linear-gradient(
+      180deg,
+      rgba(74, 48, 26, 0) 0%,
+      rgba(74, 48, 26, .10) 15%,
+      rgba(74, 48, 26, 0) 17%,
+      rgba(74, 48, 26, .12) 43%,
+      rgba(74, 48, 26, 0) 45%,
+      rgba(74, 48, 26, .14) 69%,
+      rgba(74, 48, 26, 0) 71%,
+      rgba(74, 48, 26, .16) 89%,
+      rgba(74, 48, 26, 0) 92%
+    );
+    background-size: 100% 1.8cqh;
+    background-position: left bottom;
+    background-repeat: no-repeat;
+    mix-blend-mode: multiply;
+    opacity: .55;
+  }
+
+  /* ---------- 左右页 ---------- */
+  .page {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .page-left {
+    left: 0;
+    width: 51%;
+    padding: 6.4cqh 6.0cqw 5.4cqh 6.4cqw;
+  }
+
+  /* ---------- 左页通用规则：只在查看鬼魂资料时出现 ---------- */
+  .common-panel {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    min-height: 0;
+    padding: 6.4cqh 6.0cqw 5.4cqh 6.4cqw;
+  }
+
+  .page-left.detail-open > :not(.common-panel) { display: none; }
+  .page-left.detail-open > .common-panel { display: flex; }
+
+  /* ---------- 左页诅咒之物通用规则：翻到第二页时出现 ---------- */
+  .cursed-panel {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    min-height: 0;
+    padding: 6.4cqh 6.0cqw 5.4cqh 6.4cqw;
+  }
+
+  .page-left.cursed-open > :not(.cursed-panel) { display: none; }
+  .page-left.cursed-open > .cursed-panel { display: flex; }
+
+  .panel-sub {
+    margin: .35cqh 0 0;
+    font-size: 2.15cqh;
+    line-height: 1.2;
+    letter-spacing: .12em;
+    color: var(--ink-soft);
+    opacity: .82;
+  }
+
+  .common-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-top: 2.4cqh;
+    padding-right: 1.1cqw;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(74, 48, 26, .38) transparent;
+  }
+
+  .common-body::-webkit-scrollbar { width: 8px; }
+  .common-body::-webkit-scrollbar-track { background: transparent; }
+  .common-body::-webkit-scrollbar-thumb {
+    background: rgba(74, 48, 26, .32);
+    border-radius: 4px;
+  }
+
+  .common-body:focus { outline: none; }
+
+  .common-body:focus-visible {
+    outline: 2px dashed rgba(80, 47, 18, .35);
+    outline-offset: 2px;
+  }
+
+  .common-body p {
+    position: relative;
+    margin: 0 0 1.65cqh;
+    padding-left: 1.05em;
+    font-size: 2.3cqh;
+    line-height: 1.5;
+    color: var(--ink);
+    letter-spacing: .005em;
+    text-shadow: 0 .35px 0 rgba(30, 15, 4, .24);
+  }
+
+  .common-body p::before {
+    content: "—";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: rgba(74, 48, 26, .55);
+  }
+
+  .common-body p:last-child { margin-bottom: .5cqh; }
+  .common-body strong { font-weight: 700; }
+  .common-body .common-empty { padding-left: 0; color: var(--ink-mid); }
+  .common-body .common-empty::before { content: none; }
+
+  .page-right {
+    left: 51%;
+    width: 49%;
+    padding: 6.4cqh 6.2cqw 5.4cqh 6.0cqw;
+    /* 诅咒之物名字 → 介绍用整页淡出/淡入，纸张本身不透明 */
+    transition: opacity .22s ease;
+  }
+
+  .page-right.is-fading { opacity: 0; }
+
+  .title-block { flex: 0 0 auto; }
+
+  .page-title {
+    margin: 0;
+    font-size: 6.8cqh;
+    line-height: 1.02;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--ink);
+    text-shadow: 0 .4px 0 rgba(30, 15, 4, .28);
+    transform: rotate(-.28deg);
+    transform-origin: left center;
+  }
+
+  .title-rule {
+    display: block;
+    width: 100%;
+    height: 1.15cqh;
+    margin-top: .15cqh;
+    overflow: visible;
+  }
+
+  .title-rule path {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 2.3;
+    stroke-linecap: round;
+    opacity: .82;
+    vector-effect: non-scaling-stroke;
+  }
+
+  /* ---------- 左页证据 ---------- */
+  .evidence-list {
+    list-style: none;
+    margin: 3.3cqh 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2.0cqh;
+  }
+
+  .ev {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: 1.05em;
+    align-items: start;
+    padding: .35cqh .45cqw;
+    margin: -.35cqh -.45cqw;
+    border-radius: .7cqh;
+    font-size: 16px;
+    cursor: pointer;
+    /* 悬停高亮要跟手：背景不做过渡，鼠标一进下一帧就亮（实测 90% 亮度
+       80ms → 8ms）。颜色本身只有 5.5% 浓度，硬切也不刺眼。 */
+    transition: opacity .2s ease, transform .12s ease;
+  }
+
+  .ev:hover { background: rgba(88, 53, 20, .055); }
+  .ev:active { transform: scale(.995); }
+  .ev.dim { opacity: .16; }
+
+  .ev:focus-visible {
+    outline: 2px dashed rgba(80, 47, 18, .55);
+    outline-offset: 3px;
+  }
+
+  .box {
+    position: relative;
+    width: 3.05cqh;
+    height: 3.05cqh;
+    min-width: 18px;
+    min-height: 18px;
+    margin-top: .10em;
+    border: 1.6px solid var(--ink);
+    border-radius: 2px 4px 2px 3px;
+    background: rgba(255, 250, 230, .16);
+    transform: rotate(-.9deg);
+    transition: background .15s ease, border-color .15s ease;
+  }
+
+  .ev.checked .box { background: rgba(42, 23, 9, .06); }
+
+  /* 方框里的手绘 ×（沿用 .tick 类名，不再使用游戏原版勾图） */
+  .tick {
+    position: absolute;
+    inset: 5%;
+    opacity: 0;
+  }
+
+  .tick::before,
+  .tick::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 106%;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--ink);
+  }
+
+  .tick::before {
+    transform: translate(-50%, -50%) rotate(43deg);
+  }
+
+  .tick::after {
+    width: 100%;
+    transform: translate(-50%, -50%) rotate(-47deg);
+  }
+
+  .ev.checked .tick {
+    opacity: .95;
+  }
+
+  .ev-copy {
+    display: flex;
+    flex-direction: column;
+    gap: .38cqh;
+    min-width: 0;
+  }
+
+  .ev-name {
+    position: relative;
+    display: inline-block;
+    align-self: flex-start;
+    white-space: nowrap;
+    font-size: 3.15cqh;
+    line-height: 1.15;
+    font-weight: 600;
+    letter-spacing: .02em;
+    color: var(--ink);
+    text-shadow: 0 .3px 0 rgba(30, 15, 4, .22);
+  }
+
+  .ev-name::after {
+    content: "";
+    position: absolute;
+    /* 从方框左缘起笔，连着方框、间距和证据名一起划 */
+    left: calc(-1 * max(3.05cqh, 18px) - 17.8px);
+    right: -2%;
+    top: 54%;
+    height: 2.2px;
+    border-radius: 50%;
+    background: var(--ink);
+    opacity: .92;
+    transform: scaleX(0) rotate(-1.1deg);
+    transform-origin: left center;
+    pointer-events: none;
+  }
+
+  .ev.crossed .ev-name::after {
+    transform: scaleX(1) rotate(-1.1deg);
+  }
+
+  .ev-desc {
+    font-size: 2.02cqh;
+    line-height: 1.38;
+    color: var(--ink-mid);
+    opacity: .92;
+    letter-spacing: .005em;
+  }
+
+  .page-foot {
+    margin-top: auto;
+    padding-top: 1.6cqh;
+    font-size: 1.9cqh;
+    line-height: 1.3;
+    color: #5f4227;
+    opacity: .52;
+    letter-spacing: .04em;
+  }
+
+  /* ---------- 右页鬼名 ---------- */
+  .hint {
+    margin: 2.5cqh 0 0;
+    font-size: 2.2cqh;
+    line-height: 1.35;
+    color: #3b2410;
+    letter-spacing: .01em;
+  }
+
+  .ghost-area {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-top: 2.2cqh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ghost-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    grid-auto-flow: column;
+    column-gap: .4cqw;
+  }
+
+  .ghost {
+    position: relative;
+    display: inline-block;
+    /* 三列各自居中；试过左对齐到「证据」标题，用户觉得不居中很别扭，别再改 */
+    justify-self: center;
+    align-self: center;
+    white-space: nowrap;
+    padding: .18em .10em;
+    font-size: 3.0cqh;
+    line-height: 1;
+    color: var(--ink);
+    text-shadow: 0 .3px 0 rgba(30, 15, 4, .20);
+    cursor: pointer;
+    /* 证据一勾会同时淡出多只鬼；提前分层，让透明度变化走合成而不是逐帧重绘文字 */
+    will-change: opacity;
+    transition: opacity .34s ease;
+  }
+
+  .ghost::after {
+    content: "";
+    position: absolute;
+    left: -6%;
+    right: -6%;
+    top: 52%;
+    height: 1.8px;
+    border-radius: 50%;
+    background: var(--ink);
+    opacity: .86;
+    transform: scaleX(0) rotate(-1.3deg);
+    transform-origin: left center;
+    pointer-events: none;
+  }
+
+  .ghost.crossed::after {
+    transform: scaleX(1) rotate(-1.3deg);
+  }
+
+  .ghost.faded {
+    opacity: .18;
+  }
+
+  /* 右页最底一行：重置固定在左下角，翻页提示在右下角 */
+  .page-bottom {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.2cqw;
+    margin-top: .7cqh;
+  }
+
+  .reset-btn {
+    flex: 0 0 auto;
+    padding: .15cqh .2cqw;
+    border: 0;
+    background: none;
+    color: #57371b;
+    font-family: inherit;
+    font-size: 2.15cqh;
+    line-height: 1.2;
+    letter-spacing: .08em;
+    cursor: pointer;
+    opacity: .72;
+    transition: opacity .15s ease, color .15s ease;
+  }
+
+  .reset-btn:hover {
+    opacity: 1;
+    color: var(--ink);
+    text-decoration: underline wavy rgba(60, 35, 15, .55);
+    text-underline-offset: .36em;
+  }
+
+  .reset-btn:focus-visible {
+    outline: 2px dashed rgba(80, 47, 18, .5);
+    outline-offset: 3px;
+  }
+
+  /* 可点击的页脚：翻页 / 返回 */
+  .page-turn {
+    flex: 0 0 auto;
+    padding: .15cqh .2cqw;
+    border: 0;
+    background: none;
+    color: #5f4227;
+    font-family: inherit;
+    font-size: 1.95cqh;
+    line-height: 1.3;
+    letter-spacing: .04em;
+    cursor: pointer;
+    opacity: .58;
+    transition: opacity .15s ease, color .15s ease;
+  }
+
+  .page-turn:hover {
+    opacity: 1;
+    color: var(--ink);
+    text-decoration: underline wavy rgba(60, 35, 15, .5);
+    text-underline-offset: .34em;
+  }
+
+  .page-turn:focus-visible {
+    outline: 2px dashed rgba(80, 47, 18, .5);
+    outline-offset: 3px;
+  }
+
+  .cursed-panel > .page-turn {
+    align-self: flex-start;
+    margin-top: .6cqh;
+  }
+
+  /* ---------- 右页鬼魂资料：右键打开，只覆盖右页 ---------- */
+  /* 打开时把右页抬到拖动区（z-index 60）之上，返回按钮才点得到；
+     左页仍然是可拖动的。 */
+  .page-right.detail-open { z-index: 70; }
+
+  .ghost-detail {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    min-height: 0;
+    padding: 6.4cqh 6.2cqw 5.4cqh 6.0cqw;
+  }
+
+  .page-right.detail-open > :not(.ghost-detail) { display: none; }
+  .page-right.detail-open > .ghost-detail { display: flex; }
+
+  /* 鬼名与「返回鬼名」同一行，返回字样在鬼名右侧 */
+  .detail-head {
+    display: flex;
+    align-items: baseline;
+    gap: 1.1cqw;
+    margin-top: 1.0cqh;
+  }
+
+  .detail-back {
+    flex: 0 0 auto;
+    padding: .1cqh .2cqw;
+    border: 0;
+    background: none;
+    color: #57371b;
+    font-family: inherit;
+    font-size: 2.15cqh;
+    line-height: 1.2;
+    letter-spacing: .06em;
+    cursor: pointer;
+    opacity: .78;
+    transition: opacity .15s ease, color .15s ease;
+  }
+
+  .detail-back:hover {
+    opacity: 1;
+    color: var(--ink);
+    text-decoration: underline wavy rgba(60, 35, 15, .55);
+    text-underline-offset: .34em;
+  }
+
+  .detail-back:focus-visible {
+    outline: 2px dashed rgba(80, 47, 18, .5);
+    outline-offset: 3px;
+  }
+
+  .detail-title {
+    margin: 0;
+    font-size: 5.6cqh;
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--ink);
+    text-shadow: 0 .4px 0 rgba(30, 15, 4, .28);
+    transform: rotate(-.25deg);
+    transform-origin: left center;
+  }
+
+  .detail-sub {
+    margin: .5cqh 0 0;
+    font-size: 2.2cqh;
+    line-height: 1.3;
+    color: var(--ink-soft);
+    opacity: .9;
+    letter-spacing: .03em;
+  }
+
+  .detail-rule {
+    flex: 0 0 auto;
+    width: 100%;
+    height: 1.1cqh;
+    margin-top: .25cqh;
+    overflow: visible;
+  }
+
+  .detail-rule path {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 2.1;
+    stroke-linecap: round;
+    opacity: .8;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .detail-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-top: 1.6cqh;
+    padding-right: 1.1cqw;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(74, 48, 26, .38) transparent;
+  }
+
+  .detail-body::-webkit-scrollbar { width: 8px; }
+  .detail-body::-webkit-scrollbar-track { background: transparent; }
+  .detail-body::-webkit-scrollbar-thumb {
+    background: rgba(74, 48, 26, .32);
+    border-radius: 4px;
+  }
+
+  .detail-body:focus { outline: none; }
+
+  .detail-body:focus-visible {
+    outline: 2px dashed rgba(80, 47, 18, .35);
+    outline-offset: 2px;
+  }
+
+  .detail-field { margin: 0 0 1.35cqh; }
+  .detail-field:last-child { margin-bottom: .6cqh; }
+
+  .detail-field h3 {
+    margin: 0 0 .25cqh;
+    font-size: 2.75cqh;
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--ink);
+  }
+
+  .detail-field p {
+    margin: 0;
+    font-size: 2.35cqh;
+    line-height: 1.48;
+    /* 常规字重笔画细，用主墨色 + 轻微墨迹阴影，避免整段发虚 */
+    color: var(--ink);
+    letter-spacing: .005em;
+    text-shadow: 0 .35px 0 rgba(30, 15, 4, .24);
+  }
+
+  .detail-field strong {
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .detail-field-evidence p {
+    font-size: 2.5cqh;
+    color: var(--ink);
+  }
+
+  .detail-empty {
+    margin: 1.5cqh 0 0;
+    font-size: 2.4cqh;
+    line-height: 1.5;
+    color: var(--ink-mid);
+  }
+
+  .detail-source {
+    margin-top: 1.2cqh;
+    font-size: 1.9cqh;
+    line-height: 1.4;
+    color: #6a4a2c;
+    opacity: .62;
+    word-break: break-all;
+  }
+
+  /* 诅咒之物问题表 / 塔罗牌 / 猴爪愿望的缩进子项 */
+  .detail-sublist {
+    margin: .35cqh 0 0;
+    padding-left: 1.15em;
+    list-style: none;
+  }
+
+  .detail-sublist li {
+    position: relative;
+    margin: 0 0 .55cqh;
+    padding-left: .8em;
+    font-size: 2.2cqh;
+    line-height: 1.45;
+    color: var(--ink);
+    letter-spacing: .005em;
+    text-shadow: 0 .35px 0 rgba(30, 15, 4, .22);
+  }
+
+  .detail-sublist li::before {
+    content: "·";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: rgba(74, 48, 26, .55);
+  }
+
+  .detail-sublist li:last-child { margin-bottom: 0; }
+  .detail-sublist strong { font-weight: 700; }
+
+  /* ---------- 右页诅咒之物名录 ---------- */
+  .cursed-list {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    min-height: 0;
+    padding: 6.4cqh 6.2cqw 5.4cqh 6.0cqw;
+  }
+
+  .page-right.cursed-list-open > :not(.cursed-list) { display: none; }
+  .page-right.cursed-list-open > .cursed-list { display: flex; }
+
+  .cursed-names {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin-top: 2.2cqh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2.35cqh;
+  }
+
+  .cursed-name {
+    flex: 0 0 auto;
+    padding: .18em .6em;
+    border: 0;
+    border-radius: .7cqh;
+    background: none;
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 3.5cqh;
+    line-height: 1.15;
+    letter-spacing: .06em;
+    text-shadow: 0 .3px 0 rgba(30, 15, 4, .22);
+    cursor: pointer;
+    /* 和证据行一样：悬停底色不做过渡，下一帧就亮 */
+    transition: transform .12s ease;
+  }
+
+  .cursed-names .common-empty {
+    margin: 0;
+    padding-left: 0;
+    font-size: 2.2cqh;
+    line-height: 1.45;
+    color: var(--ink-mid);
+  }
+
+  .cursed-names .common-empty::before { content: none; }
+
+  .cursed-name:hover { background: rgba(88, 53, 20, .06); }
+  .cursed-name:active { transform: scale(.99); }
+
+  .cursed-name:focus-visible {
+    outline: 2px dashed rgba(80, 47, 18, .5);
+    outline-offset: 2px;
+  }
+
+  /* ---------- 右页诅咒之物介绍：整页淡出 / 淡入 ---------- */
+  .page-right.cursed-detail-open { z-index: 70; }
+
+  .cursed-detail {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    min-height: 0;
+    padding: 6.4cqh 6.2cqw 5.4cqh 6.0cqw;
+  }
+
+  .page-right.cursed-detail-open > :not(.cursed-detail) { display: none; }
+  .page-right.cursed-detail-open > .cursed-detail { display: flex; }
+
+  /* ---------- 翻页动画 ---------- */
+  /* 右页往左翻 = 往后翻一页；左页往右翻 = 往前翻一页。
+     页面快照铺在正反两面，翻到一半时正反面自然交换。 */
+  .page-flip {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 90;
+    pointer-events: none;
+    transform-style: preserve-3d;
+    /* 只过渡 transform。以前 width / left 也跟着动，纸页里两整页文字
+       每帧都要重新排版，核显上每次翻页掉好几帧（实测长帧 ×3）。
+       现在纸页统一按宽的那页 51% 铺，窄的那页由下面
+       .flip-face > .page-right 自己定宽，起点终点照样和真实页面对齐，
+       中间也不会露出 2% 的缝。 */
+    transition: transform .52s cubic-bezier(.22, .8, .18, 1);
+    will-change: transform;
+  }
+
+  .page-flip.forward {
+    left: 51%;
+    width: 51%;
+    transform-origin: left center;
+    transform: perspective(1800px) rotateY(0deg);
+  }
+
+  .page-flip.backward {
+    left: 0;
+    width: 51%;
+    transform-origin: right center;
+    transform: perspective(1800px) rotateY(0deg);
+  }
+
+  .page-flip.forward.go {
+    transform: perspective(1800px) rotateY(-180deg);
+  }
+
+  .page-flip.backward.go {
+    transform: perspective(1800px) rotateY(180deg);
+  }
+
+  .flip-face {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .flip-face.back { transform: rotateY(180deg); }
+
+  /* 快照按纸页原本的宽度排版（左右页 51% / 49% 不等宽），
+     这样翻页起点、终点的文字换行和真实页面一字不差；
+     纸页容器比窄页宽出来的 2% 保持透明，正好落在书壳外被裁掉。 */
+  .flip-face > .page {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+  }
+
+  .flip-face > .page-right { width: 49cqw; }
+  .flip-face > .page-left { width: 51cqw; }
+
+  /* 只铺纸面，不盖住四周的皮革包边。
+     背景用半透明纸色压住 parchment 纹理，强度接近真实的 page-wash。 */
+  .flip-face > .page::before {
+    content: "";
+    position: absolute;
+    top: 2.3cqh;
+    bottom: 2.3cqh;
+    z-index: -2;
+    pointer-events: none;
+    background-color: #fbf6d2;
+    background-image:
+      linear-gradient(rgba(251, 246, 210, .62), rgba(251, 246, 210, .62)),
+      radial-gradient(ellipse at 16% 18%, rgba(117, 72, 27, .10), transparent 34%),
+      radial-gradient(ellipse at 82% 74%, rgba(117, 72, 27, .09), transparent 38%),
+      url("assets/parchment_tile.png");
+    background-size: auto, auto, auto, 290px 290px;
+    background-blend-mode: normal, multiply, multiply, multiply;
+    box-shadow: inset 0 0 18px rgba(60, 35, 12, .10);
+  }
+
+  .flip-face > .page-right::before {
+    left: 0;
+    right: 2.3cqw;
+  }
+
+  .flip-face > .page-left::before {
+    left: 2.3cqw;
+    right: 0;
+  }
+
+  /* 书脊一侧的阴影，压在纸面上、文字下 */
+  .flip-face > .page::after {
+    content: "";
+    position: absolute;
+    top: 2.3cqh;
+    bottom: 2.3cqh;
+    z-index: -1;
+    width: 10%;
+    pointer-events: none;
+  }
+
+  .flip-face > .page-right::after {
+    left: 0;
+    background: linear-gradient(90deg, rgba(56, 32, 11, .18), transparent);
+  }
+
+  .flip-face > .page-left::after {
+    right: 0;
+    background: linear-gradient(270deg, rgba(56, 32, 11, .18), transparent);
+  }
+
+  /* ---------- 手绘圈 ---------- */
+  .circle-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .34s ease;
+  }
+
+  .circle-layer.ready { opacity: 1; }
+  .circle-layer.ready.faded { opacity: .18; }
+
+  .circle-layer path {
+    fill: none;
+    stroke: var(--ink);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .circle-layer .ink-main {
+    stroke-width: 2.2;
+    stroke-width: .27cqh;
+    opacity: .9;
+  }
+
+  /* ---------- 书页上的拖动区与窗口按钮 ---------- */
+  .book-drag {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 96px;
+    height: 14cqh;
+    z-index: 60;
+    cursor: grab;
+  }
+
+  .book-drag:active { cursor: grabbing; }
+
+  .chrome {
+    position: absolute;
+    top: 3.2cqh;
+    right: 3.2cqw;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  /* 不画按钮边框：右侧内页右上角只是手写的一笔 ×，像书的主人自己标的。 */
+  .chrome button {
+    position: relative;
+    width: 35px;
+    height: 35px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: none;
+    color: #4a2c14;
+    cursor: pointer;
+    transition: color .18s ease, transform .1s ease;
+  }
+
+  .chrome button:hover { color: #231105; }
+
+  .chrome button:active { transform: scale(.9); }
+
+  .chrome button:focus-visible {
+    outline: 2px solid rgba(80, 47, 18, .45);
+    outline-offset: 2px;
+  }
+
+  .chrome svg {
+    width: 35px;
+    height: 35px;
+    display: block;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .book { animation: none; }
+    .ev, .ghost, .circle-layer, .cursed-name { transition: none; }
+    .page-flip { transition: none; }
+    .page-right { transition: none; }
+  }
