@@ -2,6 +2,10 @@
 
 一个给《恐鬼症》（Phasmophobia）用的桌面置顶笔记小窗：半透明地浮在游戏画面上，随手勾证据、查鬼魂、翻诅咒之物。
 
+**Phasmophobia Journal** is a frameless, always-on-top desktop note app for *Phasmophobia* on Windows. Tick the evidence you have, see which ghosts are still possible, and browse cursed possessions without alt-tabbing out of the game. Press `Ctrl+J` to hide it or bring it back. Built with Python and pywebview (WebView2).
+
+> 关键词 / Keywords：恐鬼症、恐鬼症笔记、恐鬼症攻略笔记、Phasmophobia、phasmophobia journal、Phasmophobia note、evidence tracker、desktop note、always-on-top、Windows 桌面笔记
+
 ![界面截图](docs/screenshot.png)
 
 ## 功能
