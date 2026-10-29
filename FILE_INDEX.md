@@ -20,7 +20,7 @@
 | `app/ghost_info.js` | 自动生成：鬼魂资料的兜底数据（无 pywebview API 的无头测试用） |
 | `app/assets/` | 素材：书页/纸纹/皮革/图标由 `tools/gen_assets.py` 生成，字体是 SIL OFL 1.1 的龙藏体（`OFL.txt` 同目录） |
 | `tools/gen_assets.py` | 程序化生成四张素材（噪声+几何，不读游戏文件）；改风格直接改这里重跑 |
-| `LICENSE` / `README.md` / `docs/screenshot.png` | 开源仓库用：MIT 许可证、说明、界面截图 |
+| `LICENSE` / `README.md` / `docs/screenshot-main.png` / `docs/screenshot-detail.png`（首页 / 详情页） | 开源仓库用：MIT 许可证、说明、界面截图 |
 | `requirements.txt` | 运行依赖：pywebview 6.2.1、pythonnet 3.1.0、Pillow 11.3.0 |
 | `启动笔记.bat` | 开发机启动器；纯 ASCII + CRLF，不进分享包 |
 | `build_share.bat` | 打包分享版的入口；纯 ASCII + CRLF，双击调用 `tools/build_share.py` |
@@ -408,7 +408,7 @@ crossed --左键--> normal
   数据文件 `app/ghost_info.js` 内容源自社区 Wiki（CC BY-SA 3.0），README 里已标注。
 - **进仓库**：`main.py` / `hotkey.py` / `ghost_info.py` / `applog.py` / `layout.py`、
   `version.py`、`app/`（含 `assets/` 与 `OFL.txt`）、`tools/`（含 `gen_assets.py`）、
-  `README.md`、`LICENSE`、`docs/screenshot.png`、`.gitignore`、`FILE_INDEX.md`。约 7.7 MB。
+  `README.md`、`LICENSE`、`docs/screenshot-main.png` / `docs/screenshot-detail.png`（首页 / 详情页）、`.gitignore`、`FILE_INDEX.md`。约 7.7 MB。
 - **不进仓库**（`.gitignore`）：`extracted/`（820 MB 游戏解包）、`dist/`、`build/`、
   `.backup/`、`legacy/`、`__pycache__/`、`tools/_asset_preview/`。
 - Release 附件：`dist\恐鬼症笔记 v1.2-分享.zip`。
