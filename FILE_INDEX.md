@@ -27,7 +27,7 @@
 | `tools/build_share.py` | PyInstaller onedir 打包 → 复制资料 → 写使用说明 → 打 zip；名称和版本取自 `version.py` |
 | `tools/smoke_packaged.mjs` | 打包版冒烟测试（CDP，11 项）：窗口、30 鬼、7 证据、资料源、右键详情、日志 |
 | `dist/恐鬼症笔记 v1.3/` | 打包产物：exe + `_internal` + `资料` + 使用说明；整个文件夹发人 |
-| `dist/恐鬼症笔记 v1.3-分享.zip` | 发给朋友的压缩包（解压后得到上面的文件夹）；**v1.3 还没传 GitHub**，v1.2 才是当前线上版本 |
+| `dist/恐鬼症笔记 v1.3-分享.zip` | 发给朋友的压缩包（解压后得到上面的文件夹）；**2026-10-29 已作为 v1.3 发布到 GitHub** |
 | `build/` | PyInstaller 中间产物和 spec，可随时删，不要打进分享包 |
 | `legacy/book_mask.py` | 历史文件：`book_spread.png` 每行可见跨度。已不再引用，从根目录移到 `legacy/` 备查 |
 | `legacy/gen_book_mask.py` | 历史工具：重新生成 `book_mask.py`；已不再需要 |
@@ -412,6 +412,18 @@ crossed --左键--> normal
 - **不进仓库**（`.gitignore`）：`extracted/`（820 MB 游戏解包）、`dist/`、`build/`、
   `.backup/`、`legacy/`、`__pycache__/`、`tools/_asset_preview/`。
 - Release 附件：`dist\恐鬼症笔记 v1.2-分享.zip`。
+- **2026-10-29 发了 v1.3**：附件 `phasmophobia-journal-v1.3-win64.zip`（18.6 MB，由
+  `dist\恐鬼症笔记 v1.3-分享.zip` 复制改名）+ 两张截图 `screenshot-1.png`（首页）、
+  `screenshot-2.png`（鬼魂详情），正文用绝对地址
+  `https://github.com/l0vedier/phasmophobia-journal/releases/download/v1.3/screenshot-N.png` 嵌图。
+  账号 2026-10-29 已开 2FA（KeePassXC），`gh auth login` 网页授权可用，**不再需要 PAT 文件**；
+  推送命令见下。
+- **推送（2026-10-29 起）**：凭证由 `gh auth login --hostname github.com --git-protocol https --web`
+  写入 Windows 凭据管理器，然后
+  `git -c credential.helper= -c credential.helper='!"C:/Program Files/GitHub CLI/gh.exe" auth git-credential' push`。
+  只写 `-c credential.helper=` 会连 gh 的 URL 作用域 helper 一起清掉，报 "could not read Username"。
+- `gh release create/upload` 的 `文件#改名` 语法对绝对路径**不生效**（资产名仍然是原文件名），
+  想换名就先把文件复制成目标文件名再传。
 - **gh 登录踩坑**：瓦特工具箱（Steam++）加速会把 `github.com` 等域名写进 hosts 指到 127.0.0.1，
   gh 的浏览器授权（OAuth device flow）经它一律 HTTP 502；`api.github.com` 和 git 推送倒是正常。
   解决：托盘里**关闭加速**（只退出程序不够，hosts 要还原），登录完再开回来。
