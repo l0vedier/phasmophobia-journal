@@ -78,6 +78,11 @@ mask、书脊阴影、圆角一个都不用改。
 > 老版本（带游戏贴图）整树备份在 `E:\Claude code\phasmophobia-journal_原版素材备份_2026-10-27`
 > （7.4 MB，不含 extracted/dist/build）。想找回原来的书页外观，把备份里的 `app/assets` 拷回来即可。
 > 注意：那份**不能**上传到 GitHub。
+>
+> **两个版本必须同步更新（用户 2026-10-29 定的规矩）**：改了本目录的 `app/app.js`、
+> `app/styles.css`、`app/index.html`、`hotkey.py` 等共用文件，就同步覆盖到那份备份里，
+> 只保留备份自己的两处差异：`app/index.html` 的 UTF-8 BOM、`<title>`（`恐鬼症笔记 v1.2-原版素材`），
+> 以及 `version.py` 的 `APP_VERSION`。之后重跑备份目录的 `python tools/build_share.py` 重打分享包。
 
 游戏原始素材仍在 `extracted/`（820 MB，已 gitignore），导出流程和本地化键见下面的历史说明。
 文字来自 `extracted/text/localisation.txt`（zh-CN 第 14 列）。
