@@ -333,6 +333,14 @@ crossed --左键--> normal
   **③ 内容本来就没溢出（`scrollHeight <= clientHeight`）时不接管鼠标**。
   `body.drag-scrolling` 负责拖动时的 `grabbing` 光标和禁止选中文字。
   测试：`node tools/test_drag_scroll.mjs`（6 项，headless Edge + CDP 真鼠标事件）。
+- **鬼魂英文名位置（2026-10-29）**：改成**靠右**，压在详情页标题下面那条分隔线
+  （`.detail-rule`）的右段上方；左边留给「资料名 / 别名」小字。
+  实现：`index.html` 的 `.detail-sub` 拆成 `#detailSubText` + `#detailEn` 两个 span，
+  `styles.css` 把 `.detail-sub` 变成 `justify-content: space-between` 的 flex 行，
+  `.detail-en:empty { display: none }` 保证没有英文名时不留空。`app.js` 里英文名不再拼进
+  `bits`，改成单独 `detailEn.textContent = section.english`。实测几何：英文名右边缘与
+  分隔线右端齐平（944px），底边 159px、分隔线顶边 160px——正好坐在这条线上方。
+  诅咒之物详情（`#cursedDetailSub`）没加英文名 span，不受影响。
 
 ## 显卡与流畅度（2026-10-25）
 
