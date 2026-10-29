@@ -1,7 +1,7 @@
 # 恐鬼症证据笔记（桌面置顶小窗）
 
 最后更新：2026-10-27
-启动：双击 `启动笔记.bat`，或 `python main.py`；分享版双击 `dist\恐鬼症笔记 v1.2\恐鬼症笔记 v1.2.exe`
+启动：双击 `启动笔记.bat`，或 `python main.py`；分享版双击 `dist\恐鬼症笔记 v1.3\恐鬼症笔记 v1.3.exe`
 依赖：`pip install -r requirements.txt`（pywebview 6.2.1 / pythonnet 3.1.0 / Pillow 11.3.0）
 
 ## 目录
@@ -26,8 +26,8 @@
 | `build_share.bat` | 打包分享版的入口；纯 ASCII + CRLF，双击调用 `tools/build_share.py` |
 | `tools/build_share.py` | PyInstaller onedir 打包 → 复制资料 → 写使用说明 → 打 zip；名称和版本取自 `version.py` |
 | `tools/smoke_packaged.mjs` | 打包版冒烟测试（CDP，11 项）：窗口、30 鬼、7 证据、资料源、右键详情、日志 |
-| `dist/恐鬼症笔记 v1.2/` | 打包产物：exe + `_internal` + `资料` + 使用说明；整个文件夹发人 |
-| `dist/恐鬼症笔记 v1.2-分享.zip` | 发给朋友的压缩包（解压后得到上面的文件夹）；也是 GitHub Release 的附件 |
+| `dist/恐鬼症笔记 v1.3/` | 打包产物：exe + `_internal` + `资料` + 使用说明；整个文件夹发人 |
+| `dist/恐鬼症笔记 v1.3-分享.zip` | 发给朋友的压缩包（解压后得到上面的文件夹）；**v1.3 还没传 GitHub**，v1.2 才是当前线上版本 |
 | `build/` | PyInstaller 中间产物和 spec，可随时删，不要打进分享包 |
 | `legacy/book_mask.py` | 历史文件：`book_spread.png` 每行可见跨度。已不再引用，从根目录移到 `legacy/` 备查 |
 | `legacy/gen_book_mask.py` | 历史工具：重新生成 `book_mask.py`；已不再需要 |
@@ -368,7 +368,8 @@ crossed --左键--> normal
   窗口标题（`main.py`）、exe / 文件夹 / zip 名称（`build_share.py`）、使用说明标题都会跟着变。
   `app/index.html` 的 `<title>` 仍是手写的，升版本时要同步改（冒烟测试会核对）。
 - PyInstaller 6.19.0，`--onedir --windowed`；产物 `dist\恐鬼症笔记 v1.2\`，再打成
-  `dist\恐鬼症笔记 v1.2-分享.zip`。**2026-10-27 v1.2：文件夹 32.0 MB，zip 17.8 MB**，
+  `dist\恐鬼症笔记 v1.2-分享.zip`。**2026-10-27 v1.2：文件夹 32.0 MB，zip 17.8 MB**；
+  **2026-10-29 v1.3（加了拖动滚动）：文件夹 32.0 MB，zip 17.8 MB**，
   内容 = v1.1 的全部 + 四张素材换成自制（可公开分发）。打包版冒烟测试 12/12 通过。
   （v1.1：32.4 MB / 18.0 MB，带游戏贴图，只在本机留档）
 - `app\` 打进 `_internal\app`；鬼魂资料复制到 exe 同级的 `资料\`，程序优先读这一份，
