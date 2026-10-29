@@ -333,14 +333,16 @@ crossed --左键--> normal
   **③ 内容本来就没溢出（`scrollHeight <= clientHeight`）时不接管鼠标**。
   `body.drag-scrolling` 负责拖动时的 `grabbing` 光标和禁止选中文字。
   测试：`node tools/test_drag_scroll.mjs`（6 项，headless Edge + CDP 真鼠标事件）。
-- **鬼魂英文名位置（2026-10-29）**：改成**靠右**，压在详情页标题下面那条分隔线
-  （`.detail-rule`）的右段上方；左边留给「资料名 / 别名」小字。
-  实现：`index.html` 的 `.detail-sub` 拆成 `#detailSubText` + `#detailEn` 两个 span，
-  `styles.css` 把 `.detail-sub` 变成 `justify-content: space-between` 的 flex 行，
-  `.detail-en:empty { display: none }` 保证没有英文名时不留空。`app.js` 里英文名不再拼进
-  `bits`，改成单独 `detailEn.textContent = section.english`。实测几何：英文名右边缘与
-  分隔线右端齐平（944px），底边 159px、分隔线顶边 160px——正好坐在这条线上方。
-  诅咒之物详情（`#cursedDetailSub`）没加英文名 span，不受影响。
+- **鬼魂详情页头（2026-10-29，定稿）**：标题行现在是 `女妖 Banshee … ← 返回鬼名` 一行：
+  **英文名紧贴中文鬼名右侧**（同一基线，字号 2.35cqh），**返回鬼名顶到行尾**（`margin-left:
+  auto`，正好落在下面分隔线右段上方），原来那行 `.detail-sub` 副标题整行删掉了。
+  `#detailSubText`（资料名 / 别名，几乎总是空）也并进这一行，`:empty { display: none }`
+  不留空位。**分隔线高度对齐**：`.detail-rule` 的 `margin-top` 从 `.25cqh` 改成 `.15cqh`、
+  `height` 改成 `1.15cqh`，跟左页 `.title-rule` 完全一致——删掉副标题行之后鬼名行的底边
+  正好等于左页大标题的底边（都是 133px），两条分隔线都落在 **y=134**。
+  改高度对齐时别把副标题行加回来，一加就掉回 160px。
+  诅咒之物详情（`#cursedDetail`）仍是「标题 + 副标题 + 线」的老结构，线在 158px，
+  没动——要一起对齐的话把它的英文名也内联进标题行。
 
 ## 显卡与流畅度（2026-10-25）
 

@@ -66,7 +66,6 @@
   const ghostDetail = document.getElementById("ghostDetail");
   const detailBack = document.getElementById("detailBack");
   const detailTitle = document.getElementById("detailTitle");
-  const detailSub = document.getElementById("detailSub");
   const detailSubText = document.getElementById("detailSubText");
   const detailEn = document.getElementById("detailEn");
   const detailBody = document.getElementById("detailBody");
@@ -546,7 +545,7 @@
       bits.push(section.alias);
     }
     detailSubText.textContent = bits.join(" · ");
-    // 英文名单独靠右放，压在详情分隔线的右段上方（不再挤在标题下的左端）
+    // 英文名紧跟中文鬼名右侧，同一行；最右边留给「返回鬼名」
     detailEn.textContent = section.english || "";
 
     section.fields.forEach(field => {

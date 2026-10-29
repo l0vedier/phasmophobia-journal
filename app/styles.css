@@ -691,16 +691,18 @@
   .page-right.detail-open > :not(.ghost-detail) { display: none; }
   .page-right.detail-open > .ghost-detail { display: flex; }
 
-  /* 鬼名与「返回鬼名」同一行，返回字样在鬼名右侧 */
+  /* 鬼名 + 英文名 同一行，最右边是「返回鬼名」 */
   .detail-head {
     display: flex;
     align-items: baseline;
-    gap: 1.1cqw;
+    gap: .9cqw;
     margin-top: 1.0cqh;
   }
 
   .detail-back {
     flex: 0 0 auto;
+    /* 顶到行尾：刚好落在下面分隔线右段的上方（原来英文名站的位置） */
+    margin-left: auto;
     padding: .1cqh .2cqw;
     border: 0;
     background: none;
@@ -738,7 +740,7 @@
     transform-origin: left center;
   }
 
-  /* 英文名靠右，正好压在下面那条分隔线的右段上方；左边留给「资料名/别名」 */
+  /* 诅咒之物详情的小字副标题（鬼魂详情不用这条，英文名已并进标题行） */
   .detail-sub {
     display: flex;
     align-items: baseline;
@@ -752,10 +754,20 @@
     letter-spacing: .03em;
   }
 
+  /* 标题行里的「资料名 / 别名」，跟英文名一个量级，坐在标题基线上 */
   .detail-sub-text {
+    flex: 0 1 auto;
     min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 2.2cqh;
+    letter-spacing: .03em;
+    color: var(--ink-soft);
+    opacity: .9;
   }
 
+  /* 英文名紧贴中文鬼名右侧，同一基线，比标题小一圈 */
   .detail-en {
     flex: 0 0 auto;
     font-size: 2.35cqh;
@@ -765,15 +777,17 @@
     white-space: nowrap;
   }
 
-  .detail-en:empty {
+  .detail-en:empty,
+  .detail-sub-text:empty {
     display: none;
   }
 
+  /* 和左页 .title-rule 用同一个上边距，两页的分隔线才能落在同一高度 */
   .detail-rule {
     flex: 0 0 auto;
     width: 100%;
-    height: 1.1cqh;
-    margin-top: .25cqh;
+    height: 1.15cqh;
+    margin-top: .15cqh;
     overflow: visible;
   }
 
