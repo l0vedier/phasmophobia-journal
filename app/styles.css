@@ -315,6 +315,14 @@
     border-radius: 4px;
   }
 
+  /* 按住拖动滚动时：手指/鼠标是「抓着纸」的状态，别顺手选中文字 */
+  body.drag-scrolling,
+  body.drag-scrolling * {
+    cursor: grabbing !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+  }
+
   .common-body:focus { outline: none; }
 
   .common-body:focus-visible {

@@ -36,6 +36,7 @@
 | `tools/test_flip.mjs` | 无头 Edge 翻页动画专项测试（CDP，31 项）：正/反翻方向、快照内容、起止对齐、翻页中保护、最终状态 |
 | `tools/test_cursed.mjs` | 诅咒之物专项测试（CDP，33 项）：第二页翻页、7 件物品、左右页布局、名字淡出/淡入介绍、返回、无重置入口、Esc、减少动态效果 |
 | `tools/test_window_features.py` | 真实窗口测试：透明、点击穿透、圆角书壳区域、顶部拖动、Ctrl+J 最小化/唤回（25 项） |
+| `tools/test_drag_scroll.mjs` | 针对性测试：长页面按住鼠标拖动滚动（6 项，headless Edge + CDP 真鼠标事件） |
 | `tools/test_taskbar_hide.py` | 针对性任务栏测试：活动窗口点按钮隐藏 / 第一次点击隐藏 / 恢复不反弹 / 普通程序切前台 / 游戏前台 Ctrl+J / 快速连按不吞键（24 项） |
 | `tools/test_ghost_info.py` | 鬼魂 + 诅咒之物资料解析 / `Api.get_ghost_info()` / 兜底数据一致性测试（23 项） |
 | `tools/check_windows.ps1` | 诊断脚本：检查 pythonw 窗口是否响应 Windows 消息 |
@@ -323,6 +324,15 @@ crossed --左键--> normal
   （`on_top` 已随置顶按钮移除）。`width / height` 仍记录，但启动时尺寸固定为最大值，不读取。
 - 启动位置沿用配置里的 `x / y`（逻辑像素，不可见则居中）；点关闭按钮或最小化时保存几何。
 - 屏蔽 F5 / Ctrl+R 刷新和 Ctrl+滚轮缩放；全局屏蔽右键菜单，但**右键鬼名**会打开资料页。
+- **按住鼠标拖动滚动（2026-10-29）**：`.common-body` / `.detail-body` / `#cursedBody` /
+  `#cursedDetailBody` 四个滚动面板原来只能用滚轮，按住左键拖没反应。`app.js` 里的
+  `enableDragScroll()` 补上了「抓着纸面拖」：记下 `mousedown` 时的 `clientY` 和 `scrollTop`，
+  `mousemove` 时按 `startTop - dy` 设回去。三个必须保留的细节：
+  **① 移动不到 4px 不算拖动**（否则会把正常点击吞掉）；**② 拖完之后那一次 `click`
+  用 capture 阶段 `once` 监听吞掉**（否则在返回按钮上拖动，松手会误触发返回）；
+  **③ 内容本来就没溢出（`scrollHeight <= clientHeight`）时不接管鼠标**。
+  `body.drag-scrolling` 负责拖动时的 `grabbing` 光标和禁止选中文字。
+  测试：`node tools/test_drag_scroll.mjs`（6 项，headless Edge + CDP 真鼠标事件）。
 
 ## 显卡与流畅度（2026-10-25）
 

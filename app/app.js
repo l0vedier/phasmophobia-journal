@@ -1041,6 +1041,57 @@
   document.addEventListener("contextmenu", ev => ev.preventDefault());
   window.addEventListener("wheel", ev => { if (ev.ctrlKey) ev.preventDefault(); }, { passive: false });
 
+  /* ---------- 按住鼠标拖动滚动 ---------- */
+  // 通用规则、鬼魂详情这些长页面原来只能用滚轮滚，按住左键拖是没反应的。
+  // 这里补上「抓着纸面拖」的手感：按住左键上下拖，内容跟着走。
+  // 拖过 4px 才算拖动，免得把正常点击吞掉；拖完那一次松手的 click 也丢掉，
+  // 不然在按钮上拖动会在松手时误触发一次。
+  function enableDragScroll(el) {
+    if (!el) return;
+    let startY = 0;
+    let startTop = 0;
+    let active = false;
+    let moved = false;
+
+    el.addEventListener("mousedown", ev => {
+      if (ev.button !== 0) return;
+      if (ev.target.closest("a, button, input, textarea, select, [data-no-drag]")) return;
+      // 本来就没得滚就别接管鼠标
+      if (el.scrollHeight <= el.clientHeight + 1) return;
+      active = true;
+      moved = false;
+      startY = ev.clientY;
+      startTop = el.scrollTop;
+    });
+
+    window.addEventListener("mousemove", ev => {
+      if (!active) return;
+      const dy = ev.clientY - startY;
+      if (!moved && Math.abs(dy) < 4) return;
+      if (!moved) {
+        moved = true;
+        document.body.classList.add("drag-scrolling");
+      }
+      el.scrollTop = startTop - dy;
+      ev.preventDefault();
+    }, { passive: false });
+
+    const finish = () => {
+      if (!active) return;
+      active = false;
+      if (!moved) return;
+      document.body.classList.remove("drag-scrolling");
+      el.addEventListener("click", ev => {
+        ev.preventDefault();
+        ev.stopPropagation();
+      }, { capture: true, once: true });
+    };
+    window.addEventListener("mouseup", finish);
+    window.addEventListener("blur", finish);
+  }
+
+  [commonBody, detailBody, cursedBody, cursedDetailBody].forEach(enableDragScroll);
+
   /* ---------- 窗口控制 ---------- */
   function callApi(name, ...args) {
     if (window.pywebview && window.pywebview.api && typeof window.pywebview.api[name] === "function") {
