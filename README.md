@@ -6,7 +6,11 @@
 
 > 关键词 / Keywords：恐鬼症、恐鬼症笔记、恐鬼症攻略笔记、Phasmophobia、phasmophobia journal、Phasmophobia note、evidence tracker、desktop note、always-on-top、Windows 桌面笔记
 
-![界面截图](docs/screenshot.png)
+![界面截图：勾证据后实时筛鬼](docs/screenshot-main.png)
+
+![界面截图：鬼魂详情页](docs/screenshot-detail.png)
+
+> 上图：左边勾证据，右边实时筛出还可能的鬼。下图：右键鬼名看详情，左页铺通用规则，正文按住鼠标就能拖着滚。
 
 ## 功能
 
