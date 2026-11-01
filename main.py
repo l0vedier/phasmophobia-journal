@@ -86,6 +86,134 @@ ICON = APP_DIR / "assets" / "ghost.ico"
 CONFIG_DIR = applog.CONFIG_DIR
 CONFIG_PATH = CONFIG_DIR / "config.json"
 
+# --------------------------------------------------------------- 启动自检
+# v1.4：pythonw 和打包后的 exe 都没有控制台，一旦启动失败，用户只看得到
+# 「双击没反应」。所以在真正建窗口之前，先把最常见的几类原因逐个查一遍，
+# 用中文弹窗说清楚该怎么办；这里查不出来的，交给文件末尾的通用异常兜底。
+_WEBVIEW2_CLIENT = "{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}"
+_WEBVIEW2_URL = "https://developer.microsoft.com/zh-cn/microsoft-edge/webview2/"
+
+
+def _ask(message: str, title: str = f"{APP_NAME} - 启动失败") -> bool:
+    """是 / 否 弹窗，返回 True 表示用户点了「是」。"""
+    try:
+        return ctypes.windll.user32.MessageBoxW(0, message, title, 0x04 | 0x30) == 6
+    except Exception:
+        return False
+
+
+def _webview2_version() -> str | None:
+    """已安装的 WebView2 运行时版本；没装返回 None。"""
+    try:
+        import winreg
+    except Exception:
+        return None
+    locations = (
+        (
+            winreg.HKEY_LOCAL_MACHINE,
+            rf"SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{_WEBVIEW2_CLIENT}",
+        ),
+        (
+            winreg.HKEY_LOCAL_MACHINE,
+            rf"SOFTWARE\Microsoft\EdgeUpdate\Clients\{_WEBVIEW2_CLIENT}",
+        ),
+        (
+            winreg.HKEY_CURRENT_USER,
+            rf"Software\Microsoft\EdgeUpdate\Clients\{_WEBVIEW2_CLIENT}",
+        ),
+    )
+    for root, path in locations:
+        try:
+            with winreg.OpenKey(root, path) as key:
+                value, _ = winreg.QueryValueEx(key, "pv")
+        except OSError:
+            continue
+        text = str(value or "").strip()
+        if text and text != "0.0.0.0":
+            return text
+    return None
+
+
+def _in_temp_dir() -> bool:
+    """exe 是不是被解压到临时目录了 —— 等于在压缩包里直接双击运行。"""
+    try:
+        exe = Path(sys.executable).resolve()
+        temp = os.environ.get("TEMP") or os.environ.get("TMP") or ""
+        if not temp:
+            return False
+        exe.relative_to(Path(temp).resolve())
+        return True
+    except (ValueError, OSError):
+        return False
+
+
+def _ghost_data_missing() -> Path | None:
+    """找不到鬼魂数据文件时返回它应该在的位置。"""
+    try:
+        from ghost_info import default_ghost_md
+
+        path = Path(default_ghost_md())
+    except Exception:
+        return None
+    return None if path.is_file() else path
+
+
+def preflight() -> None:
+    log.info(
+        "preflight: frozen=%s exe=%s", getattr(sys, "frozen", False), sys.executable
+    )
+
+    if _in_temp_dir():
+        log.error("preflight: running from temp dir")
+        _fatal(
+            "看起来你是在压缩包里直接双击运行的 —— 程序被临时解压到了临时目录，"
+            "旁边的文件都找不到，所以打不开。\n\n"
+            "请这样做：\n"
+            "1. 右键下载到的 zip → 「全部解压」\n"
+            "2. 进解压出来的文件夹\n"
+            f"3. 双击里面的 {APP_NAME}.exe\n\n"
+            "（不要双击压缩包里的 exe，也不要只把 exe 单独拖出来）"
+        )
+        raise SystemExit(1)
+
+    if not INDEX.is_file():
+        log.error("preflight: index.html missing: %s", INDEX)
+        _fatal(
+            "程序文件不完整：找不到界面文件。\n\n"
+            f"{INDEX}\n\n"
+            "请把下载到的 zip 整个解压后再运行，"
+            "exe 和 _internal 文件夹、资料文件夹必须放在一起，不能只拿 exe。"
+        )
+        raise SystemExit(1)
+
+    runtime = _webview2_version()
+    log.info("preflight: webview2 runtime = %s", runtime or "未安装")
+    if runtime is None:
+        if _ask(
+            "缺少 Microsoft Edge WebView2 运行时，程序没法显示界面。\n\n"
+            "这是微软的浏览器内核组件（免费），装上就能用。\n\n"
+            "点「是」打开官方下载页，下载后双击安装，再重新打开本程序。\n"
+            "点「否」退出。"
+        ):
+            try:
+                import webbrowser
+
+                webbrowser.open(_WEBVIEW2_URL)
+            except Exception:
+                log.exception("could not open the WebView2 download page")
+        raise SystemExit(1)
+
+    missing = _ghost_data_missing()
+    if missing is not None:
+        log.error("preflight: ghost data missing: %s", missing)
+        _fatal(
+            "找不到鬼魂数据文件，程序没法显示鬼名列表。\n\n"
+            f"应该在：{missing}\n\n"
+            "请确认压缩包里的「资料」文件夹和 exe 放在同一层，"
+            "然后把整个文件夹重新解压一次。"
+        )
+        raise SystemExit(1)
+
 
 def _log_thread_exception(args) -> None:
     log.error(
@@ -360,8 +488,7 @@ def main() -> None:
     if not claim_single_instance():
         return
 
-    if not INDEX.exists():
-        raise FileNotFoundError(f"找不到界面文件：{INDEX}")
+    preflight()
 
     cfg = load_config()
     w, h = max_window_size()
@@ -460,4 +587,10 @@ if __name__ == "__main__":
     except Exception:
         _detail = traceback.format_exc()
         log.critical("fatal error\n%s", _detail)
-        _fatal(f"{_detail}\n日志：{LOG_PATH}")
+        _lines = _detail.strip().splitlines()
+        _fatal(
+            "程序启动时发生错误，没能打开。\n\n"
+            f"错误：{_lines[-1] if _lines else '未知错误'}\n\n"
+            f"完整日志：\n{LOG_PATH}\n\n"
+            "如果反复出现，把这个日志文件发给作者就行。"
+        )

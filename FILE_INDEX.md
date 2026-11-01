@@ -626,3 +626,25 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\diagnose_black_window.
   若别的程序已经注册了全局 Ctrl+J，`RegisterHotKey` 会失败，热键线程每 2 秒重试一次，
   并最多每 10 秒写一条 warning 日志；不会再静默失败。
 - 游戏文件全程只读，未写入游戏目录。
+
+## 2026-11-02 v1.4：启动自检（按这个顺序改，别打乱）
+
+起因：有人从 GitHub 下了**源码包**（Code → Download ZIP），双击 `启动笔记.bat`，
+黑框一闪就没了 —— 那台电脑没装 Python。于是把"打不开"的各种情况都做成弹窗自解释。
+
+- `main.py` 新增 **preflight()**，在 `main()` 里 `claim_single_instance()` 之后、建窗口之前调用，
+  顺序不能变（先判断自己是不是在临时目录，再判断文件，再判断 WebView2，最后判断资料）：
+  1. `_in_temp_dir()` —— exe 在 `%TEMP%` 下 = 在压缩包里直接双击，提示"先全部解压"
+  2. `INDEX.is_file()` —— 缺 `app/index.html`（frozen 后就是 `_internal\app`），提示别只拿 exe
+  3. `_webview2_version()` —— 查三处注册表 `EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}` 的 `pv`；
+     缺失时 `_ask()` 弹「是/否」，点「是」用 `webbrowser` 打开微软官方下载页
+  4. `_ghost_data_missing()` —— 用 `ghost_info.default_ghost_md()` 找 `资料\恐鬼症_鬼魂数据_分鬼版.md`
+- `_ask()` 是 0x04|0x30（是/否 + 警告图标）的 MessageBoxW，返回 True = 用户点了「是」
+- `__main__` 的兜底异常：不再甩英文堆栈，改成「错误：<最后一行>」+ 日志路径 + "把日志发给作者"
+- `version.py` → `1.4`；`app/index.html` 的 `<title>` 同步改 `v1.4`（两处都要改）
+- `README.md` 重写：顶部直接给 Releases 直链、贴文件夹结构、写明**不要点 Code → Download ZIP**、
+  加"打不开怎么办"对照表。以后再有人问"打不开"，先让他看 README 那张表。
+- Release 资产名必须 ASCII：`dist\恐鬼症笔记 v1.4-分享.zip` 要复制成
+  `dist\phasmophobia-journal-v1.4-win64.zip` 再上传（中文名会被 GitHub 剥成 `v1.4-.zip`）
+- **原版素材版要同步**：只改 `main.py` + `version.py`（→ `1.4-原版素材`）+ `index.html` 的 title，
+  `app/` 其它素材不要覆盖，然后重跑那边的 `tools/build_share.py` 并重打分享 zip

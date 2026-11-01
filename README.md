@@ -6,6 +6,47 @@
 
 > 关键词 / Keywords：恐鬼症、恐鬼症笔记、恐鬼症攻略笔记、Phasmophobia、phasmophobia journal、Phasmophobia note、evidence tracker、desktop note、always-on-top、Windows 桌面笔记
 
+## 下载安装（普通玩家看这里）
+
+**👉 [点这里下载最新版](https://github.com/l0vedier/phasmophobia-journal/releases/latest)**
+
+打开页面后在 **Assets** 里点 `phasmophobia-journal-vX.Y-win64.zip`（约 18 MB），然后：
+
+1. **右键 zip → 全部解压**（不要直接双击压缩包里的 exe）
+2. 进入解压出来的文件夹
+3. 双击 `恐鬼症笔记 vX.Y.exe`
+
+不用装 Python，不用装任何运行库，解压即用。第一次运行时如果 Windows 弹蓝色提示，点「更多信息」→「**仍要运行**」。
+
+> ### ⚠️ 不要点绿色的 `Code` → `Download ZIP`
+> 那是**源码**（约 9 MB），里面没有 exe。双击里面的 `启动笔记.bat` 只会闪一下黑框，然后什么都没有——它需要你自己装 Python 才能跑。
+>
+> 想直接玩，只认 **Releases** 里的 zip。
+
+**解压后文件夹必须长这样，三个东西缺一不可：**
+
+```
+恐鬼症笔记 vX.Y\
+├─ 恐鬼症笔记 vX.Y.exe
+├─ _internal\          ← 不能删、不能只拿走 exe
+└─ 资料\               ← 不能删
+```
+
+## 打不开怎么办
+
+**v1.4 起，程序启动失败会自己弹中文窗口告诉你原因**，按提示做就行。常见情况对照：
+
+| 现象 | 原因 | 怎么办 |
+|---|---|---|
+| 黑框一闪就没有，界面不出来 | ① 在压缩包里直接双击运行；② 下成了源码包 | 先把 zip 全部解压；确认下的是 Releases 里的 zip |
+| 弹窗说缺少 WebView2 运行时 | 系统缺微软的浏览器内核组件 | 弹窗里点「是」打开官方下载页，装完重新打开 |
+| 弹窗说找不到界面文件 / 鬼魂数据 | 只把 exe 单独拖出来了 | 重新解压整个文件夹，三个东西放同一层 |
+| 双击完全没反应 | 程序其实已经在运行了 | 看任务栏右下角托盘，或按 `Ctrl+J` 唤出 |
+
+还是打不开，把 `%APPDATA%\PhasmophobiaJournal\journal.log` 这个日志文件发给作者。
+
+**系统要求**：Windows 10 / 11。Win11 自带 WebView2 运行时；Win10 只要装过 Edge 一般都有，没有的话程序会引导你装一次（免费，约 2 MB）。
+
 ![界面截图：勾证据后实时筛鬼](docs/screenshot-main.png)
 
 ![界面截图：鬼魂详情页](docs/screenshot-detail.png)
@@ -20,10 +61,11 @@
 - **无边框圆角窗**：书页外区域全透明，不挡视线；`Ctrl+J` 显示 / 隐藏
 - **不跟游戏抢显卡**：界面用核显渲染（`--force_low_power_gpu`），独显留给游戏
 - **配置随用户走**：浏览器式布局设置存在 `%APPDATA%\PhasmophobiaJournal\config.json`，更新程序不丢设置
+- **启动自检**：缺 WebView2、没解压、只拿走 exe 等情况会弹中文提示说明怎么修（v1.4 起）
 
-## 运行
+## 从源码运行（开发者）
 
-需要 Windows 10/11，以及 WebView2 运行时（Win11 自带）。
+需要 Windows 10/11、Python 3.10+，以及 WebView2 运行时。
 
 ```bat
 pip install -r requirements.txt
@@ -36,7 +78,7 @@ python main.py
 python tools/build_share.py
 ```
 
-产物在 `dist\恐鬼症笔记 vX.Y\`（onefolder）和 `dist\vX.Y-分享.zip`。
+产物在 `dist\恐鬼症笔记 vX.Y\`（onefolder）和 `dist\phasmophobia-journal-vX.Y-win64.zip`。
 
 ## 素材与版权
 
