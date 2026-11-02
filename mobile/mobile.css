@@ -1,0 +1,506 @@
+/* 恐鬼症笔记 · 手机版（竖屏，四页横滑） */
+
+@font-face {
+  font-family: "LongCang";
+  src: url("assets/LongCang-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  --ink: #2a1709;
+  --ink-soft: #4a301a;
+  --ink-mid: #5b3d22;
+  --ink-faint: #8a6a4a;
+  --paper: #f7f1d9;
+  --radius: 14px;
+  --ease: cubic-bezier(.22, .61, .36, 1);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #140d07;
+  color: var(--ink);
+  font-family: "LongCang", "KaiTi", "STKaiti", serif;
+  -webkit-user-select: none;
+  user-select: none;
+  overscroll-behavior: none;
+}
+
+/* ---------- 书 ---------- */
+.book {
+  position: fixed;
+  inset: 0;
+  padding: calc(6px + env(safe-area-inset-top)) 8px
+           calc(6px + env(safe-area-inset-bottom)) 8px;
+}
+
+.book-frame {
+  position: absolute;
+  inset: 5px;
+  border-radius: var(--radius);
+  background: url("assets/leather.png") repeat;
+  background-size: 320px;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, .55),
+    inset 0 0 26px rgba(0, 0, 0, .55);
+  pointer-events: none;
+}
+
+/* 皮革内侧的金属边 */
+.book-frame::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: calc(var(--radius) - 5px);
+  border: 1px solid rgba(0, 0, 0, .45);
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, .35);
+}
+
+/* ---------- 横向翻页 ---------- */
+.pager {
+  position: relative;
+  display: flex;
+  height: 100%;
+  will-change: transform;
+  touch-action: pan-y;          /* 横向滑动交给 JS，纵向交给浏览器 */
+  transition: transform .32s var(--ease);
+}
+
+.pager.dragging { transition: none; }
+
+/* 电脑上用鼠标拖动 */
+.no-touch .pager { cursor: grab; }
+.no-touch .pager.dragging { cursor: grabbing; }
+
+.page {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 18px 32px 10px;
+  margin: 0;
+  border-radius: 8px;
+  background: url("assets/parchment_tile.png") repeat;
+  background-size: 300px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, .35) inset,
+    0 0 18px rgba(0, 0, 0, .35);
+  overflow: hidden;
+}
+
+.page-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(74, 48, 26, .28);
+}
+
+.page-title {
+  margin: 0;
+  font-size: clamp(26px, 8vw, 34px);
+  font-weight: normal;
+  letter-spacing: .06em;
+  color: var(--ink);
+}
+
+.page-no {
+  font-size: 13px;
+  color: var(--ink-faint);
+  letter-spacing: .08em;
+}
+
+.page-scroll {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 10px 2px 18px;
+  overscroll-behavior: contain;
+}
+
+.hint {
+  margin: 4px 0 12px;
+  font-size: 15px;
+  color: var(--ink-mid);
+}
+
+
+.page-foot {
+  margin: 14px 0 0;
+  font-size: 13px;
+  color: var(--ink-faint);
+  text-align: center;
+}
+
+/* ---------- 证据 ---------- */
+.evidence-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.evidence {
+  display: flex;
+  transition: opacity .2s;
+  align-items: center;
+  gap: 14px;
+  min-height: 62px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(74, 48, 26, .18);
+  background: rgba(255, 255, 255, .18);
+}
+
+.evidence .ev-box {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--ink-soft);
+  border-radius: 4px;
+  position: relative;
+}
+
+.evidence .ev-name {
+  font-size: 21px;
+  color: var(--ink);
+}
+
+.evidence.checked {
+  background: rgba(90, 60, 30, .12);
+}
+.evidence.checked .ev-box::after {
+  content: "✓";
+  position: absolute;
+  inset: -6px 0 0 2px;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.evidence.crossed .ev-name {
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+  color: var(--ink-faint);
+}
+.evidence.dim { opacity: .22; }
+
+.evidence.crossed .ev-box {
+  border-color: var(--ink-faint);
+  opacity: .55;
+}
+
+/* ---------- 鬼名 ---------- */
+.ghost-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.ghost {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 4px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: clamp(17px, 4.6vw, 21px);
+  color: var(--ink);
+  background: rgba(255, 255, 255, .16);
+  transition: opacity .2s, background .2s, border-color .2s;
+}
+
+.ghost.faded {
+  opacity: .22;
+}
+
+.ghost.selected {
+  border-color: var(--ink);
+  background: rgba(90, 60, 30, .16);
+  box-shadow: inset 0 0 0 1px rgba(42, 23, 9, .35);
+}
+
+.ghost.crossed {
+  color: var(--ink-faint);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+/* ---------- 诅咒之物 ---------- */
+.cursed-names {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.cursed-name {
+  min-height: 64px;
+  border-radius: 8px;
+  border: 1px solid rgba(74, 48, 26, .28);
+  background: rgba(255, 255, 255, .16);
+  font-family: inherit;
+  font-size: 21px;
+  color: var(--ink);
+}
+
+/* ---------- 规则正文 ---------- */
+.rules-body p {
+  margin: 0 0 12px;
+  font-size: 17px;
+  line-height: 1.62;
+  color: var(--ink-soft);
+}
+
+.rules-body strong { color: var(--ink); }
+
+/* ---------- 边缘翻页提示 ---------- */
+.edge-hint {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) scale(.96);
+  width: 38px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 0 12px;
+  border: 1px solid rgba(74, 48, 26, .35);
+  border-radius: 12px;
+  background: rgba(247, 241, 217, .88);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, .35);
+  color: #4a301a;
+  font-family: inherit;
+  opacity: 0;
+  transition: opacity .25s, transform .18s;
+  pointer-events: none;
+  z-index: 6;
+}
+
+.edge-hint.show {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+  pointer-events: auto;
+}
+
+.edge-hint.show:active { transform: translateY(-50%) scale(.94); }
+
+.edge-left { left: 1px; }
+.edge-right { right: 1px; }
+
+.edge-arrow {
+  font-size: 24px;
+  line-height: .9;
+  font-weight: bold;
+}
+
+.edge-label {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  font-size: 14px;
+  letter-spacing: .12em;
+}
+
+/* ---------- 资料浮层 ---------- */
+.sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(10, 6, 3, .45);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity .22s, visibility .22s;
+}
+
+.sheet.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sheet-paper {
+  width: 100%;
+  max-height: 92%;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 20px calc(12px + env(safe-area-inset-bottom));
+  border-radius: 16px 16px 0 0;
+  background: url("assets/parchment_tile.png") repeat;
+  background-size: 300px;
+  box-shadow: 0 -6px 24px rgba(0, 0, 0, .45);
+  transform: translateY(18px);
+  transition: transform .26s var(--ease);
+}
+
+.sheet.open .sheet-paper { transform: translateY(0); }
+
+.sheet-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(74, 48, 26, .28);
+}
+
+.sheet-title {
+  margin: 0;
+  font-size: 27px;
+  font-weight: normal;
+  color: var(--ink);
+}
+
+.sheet-en {
+  flex: 1 1 auto;
+  font-size: 13px;
+  color: var(--ink-faint);
+  font-family: Georgia, serif;
+}
+
+.sheet-back {
+  flex: 0 0 auto;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  font-size: 17px;
+  color: var(--ink-soft);
+}
+
+.sheet-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-top: 10px;
+  overscroll-behavior: contain;
+}
+
+.sheet-body h3 {
+  margin: 14px 0 6px;
+  font-size: 16px;
+  font-weight: normal;
+  letter-spacing: .1em;
+  color: var(--ink-faint);
+}
+
+.sheet-body h3:first-child { margin-top: 0; }
+
+.sheet-body p {
+  margin: 0 0 10px;
+  font-size: 18px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+
+.sheet-body strong { color: var(--ink); }
+
+/* ---------- 从底部翻上来的通用规则（整页） ---------- */
+.drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 19;
+  background: rgba(10, 6, 3, .45);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .28s;
+}
+
+.drawer-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 20px calc(14px + env(safe-area-inset-bottom));
+  border-radius: 14px;
+  background: #f7f1d9 url("assets/parchment_tile.png") repeat;
+  background-size: 300px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .38);   /* 整页大小，影子别做太大，重绘更省 */
+  transform: translateY(100%);
+  transition: transform .32s var(--ease);
+  pointer-events: none;
+  z-index: 20;
+  will-change: transform;
+  contain: paint;
+}
+
+.drawer.open {
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.drawer.dragging { transition: none; }
+
+.drawer-grip {
+  flex: 0 0 auto;
+  touch-action: none;
+  width: 46px;
+  height: 5px;
+  margin: 0 auto 8px;
+  border-radius: 3px;
+  background: rgba(74, 48, 26, .35);
+}
+
+/* 页脚上的标签，点一下 / 往上拉都能叫出通用规则 */
+.page-tab-zone {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0 4px;
+  touch-action: none;          /* 整条底部都能起手，不只有标签 */
+}
+
+.page-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 20px;
+  border: 1px solid rgba(74, 48, 26, .35);
+  border-radius: 999px;
+  background: rgba(247, 241, 217, .92);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .22);
+  font-family: inherit;
+  font-size: 16px;
+  letter-spacing: .08em;
+  color: var(--ink-soft);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;         /* 起手交给外层区域 */
+}
+
+.tab-arrow {
+  font-size: 18px;
+  line-height: 1;
+  color: var(--ink-faint);
+}
+
+
+.detail-empty {
+  color: var(--ink-faint);
+  font-size: 16px;
+}
+
+/* 横屏时也不允许撑破，锁竖屏由 manifest 负责 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .page { padding: 10px 18px 6px; }
+  .ghost { min-height: 46px; }
+}

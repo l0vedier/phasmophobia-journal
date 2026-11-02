@@ -648,3 +648,141 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\diagnose_black_window.
   `dist\phasmophobia-journal-v1.4-win64.zip` 再上传（中文名会被 GitHub 剥成 `v1.4-.zip`）
 - **原版素材版要同步**：只改 `main.py` + `version.py`（→ `1.4-原版素材`）+ `index.html` 的 title，
   `app/` 其它素材不要覆盖，然后重跑那边的 `tools/build_share.py` 并重打分享 zip
+
+## 2026-11-02 手机版（安卓 / 锁竖屏 / 一次只看一页）
+
+- `mobile/` = 纯前端，直接双击 `mobile/index.html` 就能看；`android/` = 手工打包工程（**没有用 Gradle**）
+- 四页横滑：**证据 → 鬼魂 → 诅咒之物 → 通用规则**。左右边缘各有一个半透明箭头 + 下一页名字，
+  用 `writing-mode: vertical-rl` 竖排；第一页没有左箭头、最后一页没有右箭头（`.edge-hint.show` 控制）
+- 交互和桌面版对齐：证据 normal → checked → crossed 三态，筛选规则仍是
+  `checked.some(k => !g.ev.includes(k)) || crossed.some(k => g.ev.includes(k))`；
+  鬼名点一下圈住、再点划除、划除再点取消
+- **鬼魂资料在手机上是「长按鬼名」弹底部浮层**（桌面版是右键），长按 480ms，手指移动 >12px 就取消；
+  长按后的那次 click 必须吞掉，否则会顺手把鬼名选中
+- `window.__onBack()`：先关浮层 → 再退上一页 → 都没有才返回 `"exit"`；
+  `MainActivity.onBackPressed()` 用 `evaluateJavascript` 读返回值决定要不要 `finish()`
+- 打包装包：双击 `android\build.bat`（aapt2 compile → link → javac → d8 → python 追加 classes.dex →
+  zipalign → apksigner）。产物 `android\恐鬼症笔记.apk`，约 4.9 MB，minSdk 21 / targetSdk 34
+- **keystore 不能换**：`android\keystore\journal.keystore`，别名 `journal`，密码 `phasmo2026`。
+  换 key 后新包不能覆盖安装，只能先卸载（笔记状态不落盘，卸载无损失）
+- 坑：
+  - `.page` **不能加左右 margin**，否则 `translateX(-100%)` 每页都会漂；现在是 `flex: 0 0 100%; margin: 0`
+  - `aapt2 link -A ..\mobile` 会把整个 mobile 目录塞进 assets，所以 `android/` 必须放在 mobile **外面**，
+    否则会把 build 产物自己打进 apk
+  - d8 的 `classes.dex` 用 python `zipfile` 追加；**别用 `jar`**，这台机器 PATH 上的是 `D:\mcjava\bin` 的旧 jar
+  - zipalign 报 "header mismatch" 是 png 对齐警告，可以忽略
+- 改数据时两处要一起改：`mobile/mobile.js` 顶部的 `EVIDENCE` / `GHOSTS` 与 `app/app.js` 保持一致；
+  鬼魂正文来自 `ghost_info.js`（复制自 `app/`，改完重跑 `python tools/gen_ghost_info.py` 再复制一次）
+- 自测（Edge headless 注入脚本）：证据三态 + 筛选 17↔13、鬼名圈住/划除、长按浮层 8 段正文、
+  滑动翻页与末页钳位、返回键逐级回退全部通过；**真机还没测**
+
+### 2026-11-02 手机版补丁：鼠标拖动 + 提示放大
+
+- 翻页拖拽抽成 `dragStart/dragMove/dragEnd`，触摸和鼠标共用一个判定；没有 `ontouchstart` 的环境
+  （电脑浏览器预览）额外挂 `mousedown/mousemove/mouseup`，并给 `body` 加 `.no-touch` 出 `cursor: grab`
+- 边缘提示从纯文字改成**竖排圆角卡片**：宽 46px、纸色 88% 不透明、箭头 30px、名字 16px，
+  `.page` 左右内边距同步加到 30px，避免卡片压住正文
+- **bat 坑**：调用别的 .bat（`d8.bat`、`apksigner.bat`）必须写 `call`，否则控制权转走不回来，
+  后面的重命名和 `[DONE]` 永远不执行（症状：build 显示成功但没有最终中文名的 apk）
+
+### 2026-11-02 手机版改成五页
+
+- 页面顺序改为 **证据 → 鬼魂 → 鬼魂通用规则 → 诅咒之物 → 诅咒物通用规则**，
+  对应 `mobile.js` 的 `PAGE_NAMES`；加了页面记得同步 `index.html` 的 `page-no`（x / 5）和 `aria-label`
+- 「鬼魂通用规则」正文来自 `ghost_info.js` 的 `common`（13 条），「诅咒物通用规则」来自 `cursed_common`（10 条）
+- 边缘提示卡片缩到 38px（箭头 24px、名字 14px），`.page` 左右内边距 32px，卡片不再压住勾选框
+- **到头回弹 bug**：`goTo()` 原来在 `clamped === page` 时直接 return，导致在首页/末页拖出来的偏移留在原地；
+  现在这种情况也要 `applyPage(true)` 弹回去
+
+### 2026-11-02 通用规则改成向下滑
+
+- 横滑只剩三页：**证据 → 鬼魂 → 诅咒之物**
+- 「鬼魂通用规则」(ghost_info.common, 13 条) 和「诅咒物通用规则」(cursed_common, 10 条) 各自改成
+  **在该页顶部继续向下拉 70px 打开底部浮层**；页内还有一个虚线按钮 `#ghostPull` / `#cursedPull`，
+  点它也能打开（电脑上用鼠标拖不动时用这个）
+- 下拉判定在 `bindPull()`：只在 `scrollTop <= 0` 时生效，向下位移 >70px 触发；向上滑不会误触
+- 浮层是第三个 `.sheet`（`#rulesSheet`），标题和正文在 `openRulesSheet(kind)` 里按 kind 现场渲染
+- 加页面/改顺序要同时改：`index.html` 的 `page-no`（x / 3）、`PAGE_NAMES`、`.page` 节点顺序
+
+### 2026-11-02 通用规则改成「从顶部往下拉」
+
+- 之前的底部浮层 + 顶部虚线按钮**已废弃**（用户：方向反了、没有滑动过程、不要写在最上面）
+- 现在：在鬼魂页 / 诅咒之物页的**顶部继续往下拉**，浮层是 `#rulesSheet` 这个**顶部抽屉**，
+  手指移动多少它露出多少（`drawerProgress(p)`，p = dy / 抽屉高度），松手超过 **30%** 才留下，
+  否则弹回去；点遮罩、点「收起」、按返回键都能关
+- 提示文字改成页面最底部的 `page-foot`（「向下滑看鬼魂通用规则」/「向下滑看诅咒物通用规则」），
+  样式跟证据页的「点一下：勾选 → 划除 → 取消」一致，页顶不再有任何按钮
+- 抽屉 `left/right: 8px`（跟纸页同宽，留出皮革封面）、`max-height: 86%`、底部圆角 14px
+- 位置：`.drawer` 接在 `#cursedSheet` 后面，**不要**用 `.sheet` 的类；`.drawer.dragging` 关掉过渡才跟手
+- 注意：absolute 子元素的包含块是 `.book` 的 padding box（含 padding），所以 `left: 0` 会顶到屏幕边，
+  想跟纸页对齐要显式写 8px
+
+### 2026-11-02 通用规则最终形态：底部升起 + 页脚标签
+
+- 抽屉改成 **从底部升起**：`.drawer { bottom: 0; left/right: 8px; border-radius: 14px 14px 0 0;
+  transform: translateY(100%) }`，`drawerProgress(p)` 用 `translateY(h * (1 - p))`，p=0 在屏幕下方、p=1 落位
+- 入口是页脚居中的 **标签** `#ghostTab` / `#cursedTab`（`.page-tab`，跟左右边缘提示同一套纸色卡片样式），
+  **页面上不再有任何「向下滑看…」的文字**
+- 手势：按住标签**往上拉**，抽屉跟着升（过 30% 松手留下，否则缩回）；点标签则直接用 0.3s 过渡弹出
+- 关闭：点遮罩 / 点「收起」/ 返回键 / 在顶部横杠 `.drawer-grip` 往下拖过 30%
+- 拖完松手后 400ms 内的 click 会被吞掉（`dragged` 标志），避免回弹的同时又把抽屉弹开
+- 前面的「页顶往下拉」「页脚文字提示」两种做法均已废弃；`bindPull()` 整段删除
+
+### 2026-11-02 通用规则只认滑动，不认点击
+
+- `#ghostTab` / `#cursedTab` 的 click 监听**已删除**，点标签没反应；只能**按住往上拉**
+- 标签前加了一个 `︿`（`.tab-arrow`），内边距加到 `10px 22px`，更好抓
+- 拖动过程、30% 阈值、松手判定不变；关闭方式不变（遮罩 / 收起 / 返回键 / 横杠下拖）
+- 注意：以后要恢复点击打开，只需在 `bindTabDrag()` 里重新加 click，并处理「拖完松手后那次 click」
+  （之前的做法是 `dragged` 标志 + 400ms 复位）
+
+### 2026-11-02 手机真机「上拉没反应 / 还有点击效果」的修复
+
+- 真机上拉不动的原因：`.pager` 上有 `touch-action: pan-y`，浏览器把竖向手势判成滚动并 **touchcancel**，
+  页面里收得到 touchstart 收不到完整的 touchmove。修法两层：
+  1. `.page-tab` / `.drawer-grip` 显式 `touch-action: none`（与祖先取交集后为 none）
+  2. 它们的 touchmove 改成 `{ passive: false }`，一旦 `mode === 1` 就 `preventDefault()`
+- 点击效果：`.page-tab:active` 的缩放已删，标签现在完全没有按下反馈，只有拖动
+- 标签加大到 `12px 26px`（真机上约 44×182），并加 `-webkit-touch-callout: none` 防长按弹菜单
+- 教训：**凡是 JS 自己接管竖向/横向拖拽的元素，都要写 touch-action，不然手机上会被浏览器抢走手势**
+
+### 2026-11-02 整页都能下滑收回通用规则
+
+- 关闭手势从「只能抓顶部横杠」放开到**整页任意位置往下拖**：监听挂在 `#rulesSheet` 上，
+  `canStart()` 用 `ev.target.closest(".sheet-body")` 判断落点——不在正文里随时可收，
+  在正文里则要求 `scrollTop <= 2`（滚到顶才算），否则下滑仍然归正文滚动
+- 判定与打开对称：横竖比 1.2 分方向、横向不算，下滑超过 `PULL_OPEN_PX = 110` 才收，
+  不够就动画弹回原状
+- `.drawer-grip` 从「唯一抓手」降级成纯装饰，不用再抓它
+- 遮罩点击 / 收起按钮 / 返回键三种关闭方式都保留
+- 验证（headless Edge）：正文顶部下拉 160 → 关；下拉 60 → 留在打开态；正文滚到 120 再下拉 → 不误关；
+  横向滑 → 不关；标题区下拉 → 关；返回键 → "handled" 且关闭
+- APK 已重打（4.9 MB，证书不变）
+
+### 2026-11-02 通用规则改成「整页」+ 去掉翻页卡顿
+
+- 抽屉从半页高的浮层改成 **整页**：`.drawer { top: 6px; bottom: 6px; left: 8px; right: 8px;
+  border-radius: 14px }`，即盖住书本内框的整块纸面，不再只露一半；`drawerHeight = drawer.offsetHeight`
+  自动跟着变（约等于视口高 - 12px），拖拽比例和 `PULL_OPEN_PX = 110` 阈值是按像素算的，不受影响
+- 打开/关闭不再每帧写 `visibility`，改成 **class 驱动**：`drawerOpen()` 去掉内联 transform 加 `.open`
+  （CSS `.drawer.open { transform: translateY(0) }`），`drawerClose()` 反向操作；拖动中才用内联
+  `translateY` + `.dragging`（`transition: none`）
+- 卡顿的三处处理：
+  1. `drawerProgress()` 每帧只写 transform 和遮罩 opacity/pointer-events，别的都不碰
+  2. 规则正文 **预先拼成 HTML 字符串缓存**（`rulesHTML` / `buildRules()`），打开时只做一次 innerHTML
+  3. 启动后 60ms 跑 `warmDrawer()`，把鬼魂、诅咒物两套规则各排版一次，第一次上拉不用现场算布局
+- 阴影从 `0 10px 30px` 收到 `0 4px 14px`（整页大小，大模糊阴影重绘更贵）
+- 验证：headless Edge 里抽屉矩形 6→752（视口 758），拖 130px 打开、60px 回弹、收起按钮、
+  返回键（返回 "handled" 并回到未打开态）、顶部横杠下拖关闭，全部通过；`warmParas` 13 段、诅咒物 10 段
+- APK 已重打：`android\恐鬼症笔记.apk`，4.9 MB，签名证书不变（CN=Phasmo Journal）
+
+### 2026-11-02 不必抓标签 + 箭头朝下 + 选中鬼名淡化证据
+
+- 底部标签外面包了一层 `.page-tab-zone`（整条宽 ≈ 页面宽度、高约 50px、`touch-action: none`），
+  **整条底部区域都能起手往上拉**，不再只认中间那颗标签；标签本身 `pointer-events: none`
+- 另外 `.page-scroll` 上也有同样的上拉判定，但**只有滚到底**（`atBottom()`）才生效，
+  否则上滑仍然归列表滚动
+- 标签箭头从 `︿` 改成 `﹀`（朝下）
+- 新增：**选中鬼名时，证据页里不属于它的证据变淡**（`.evidence.dim`，opacity .22）。
+  逻辑在 `applyEvidenceDim()`，在 `clickGhost()` 末尾调用；取消选中/划除时自动恢复
+- 手机版和电脑版这里行为对齐（电脑版是鼠标悬停触发，手机版是点选触发）

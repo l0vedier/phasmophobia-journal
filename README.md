@@ -63,6 +63,19 @@
 - **配置随用户走**：浏览器式布局设置存在 `%APPDATA%\PhasmophobiaJournal\config.json`，更新程序不丢设置
 - **启动自检**：缺 WebView2、没解压、只拿走 exe 等情况会弹中文提示说明怎么修（v1.4 起）
 
+## 手机版（安卓）
+
+**👉 [下载 APK](https://github.com/l0vedier/phasmophobia-journal/releases/download/v1.4/phasmophobia-journal-mobile-v1.0.apk)**（约 4.9 MB）
+
+下载后拷到手机上直接安装（第一次要允许「安装未知来源应用」）。竖屏使用：
+
+- **左右滑动翻页**：证据 → 鬼魂 → 诅咒之物
+- **点证据**：勾选 → 划除 → 取消，鬼名实时筛选
+- **点鬼名**：圈住这只鬼，同时证据页里不属于它的证据会变淡；长按看资料
+- **页面底部往上拉**：翻出「鬼魂通用规则」/「诅咒物通用规则」整页，往下拉或点「收起」/ 返回键回到原页
+
+最低支持 Android 5.0（API 21）。手机版和桌面版用的是同一份 `ghost_info.js` 数据，改数据记得两边同步。
+
 ## 从源码运行（开发者）
 
 需要 Windows 10/11、Python 3.10+，以及 WebView2 运行时。
@@ -79,6 +92,15 @@ python tools/build_share.py
 ```
 
 产物在 `dist\恐鬼症笔记 vX.Y\`（onefolder）和 `dist\phasmophobia-journal-vX.Y-win64.zip`。
+
+安卓版（不用 Gradle，直接调 aapt2 / javac / d8 / apksigner）：
+
+```bat
+cd android
+build.bat
+```
+
+需要 Android SDK build-tools 34 和 JDK。签名密钥放 `android\keystore\journal.keystore`，口令写在同一目录的 `pass.txt` 一行——**这两个都不入库**，自己打包要先准备。
 
 ## 素材与版权
 
