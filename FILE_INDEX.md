@@ -753,13 +753,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\diagnose_black_window.
 - **不入库**（已写进 `.gitignore`）：`android/keystore/`（签名密钥 + `pass.txt` 口令）、
   `android/build/`、`android/*.apk`、`android/*.idsig`
 - `build.bat` 不再写死签名口令，改成读 `android\keystore\pass.txt` 第一行；缺文件会报错退出
-- APK 作为 **Release 资产**发布，不塞进仓库：在 v1.4 发布页新增
-  `phasmophobia-journal-mobile-v1.0.apk`（4.9 MB）。Release 资产名必须 ASCII，中文名会被 GitHub 剥掉
-- 没有新建 release：新 release 会顶掉 `releases/latest`，把桌面版下载页挤掉；所以挂在 v1.4 下面，
-  并在 v1.4 发布说明里补了「手机版（安卓）」一节
+- APK 作为 **Release 资产**发布，不塞进仓库。Release 资产名必须 ASCII，中文名会被 GitHub 剥掉
+- **手机版有独立发布页**：tag `mobile-v1.0`，标题「恐鬼症笔记 手机版 v1.0（安卓）」。
+  创建时必须加 `--latest=false`，否则新 release 会顶掉 `releases/latest`，把桌面版下载页挤掉
+  （`gh release create mobile-v1.0 <apk> --latest=false`）；桌面版 v1.4 的说明里只留一行指向它
 - README 增加「手机版（安卓）」下载段和安卓打包说明；`mobile/assets/OFL.txt` 补上字体许可证
 - 以后手机版更新：重新 `build.bat` → 改名成 ASCII（如 `phasmophobia-journal-mobile-v1.1.apk`）→
-  `gh release upload v1.4 <文件>`，README 里的链接同步改版本号
+  `gh release create mobile-v1.1 <文件> --latest=false`，README 里的链接同步改版本号
 
 ### 2026-11-02 整页都能下滑收回通用规则
 
