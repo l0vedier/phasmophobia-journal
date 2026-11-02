@@ -65,7 +65,7 @@
 
 ## 手机版（安卓）
 
-**👉 [下载 APK](https://github.com/l0vedier/phasmophobia-journal/releases/download/mobile-v1.0/phasmophobia-journal-mobile-v1.0.apk)**（约 4.9 MB）　·　[发布页](https://github.com/l0vedier/phasmophobia-journal/releases/tag/mobile-v1.0)
+**👉 [下载 APK](https://github.com/l0vedier/phasmophobia-journal/releases/download/mobile-v1.1/phasmophobia-journal-mobile-v1.1.apk)**（约 4.9 MB）　·　[发布页](https://github.com/l0vedier/phasmophobia-journal/releases/tag/mobile-v1.1)
 
 下载后拷到手机上直接安装（第一次要允许「安装未知来源应用」）。竖屏使用：
 
