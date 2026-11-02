@@ -819,3 +819,16 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\diagnose_black_window.
 - 新增：**选中鬼名时，证据页里不属于它的证据变淡**（`.evidence.dim`，opacity .22）。
   逻辑在 `applyEvidenceDim()`，在 `clickGhost()` 末尾调用；取消选中/划除时自动恢复
 - 手机版和电脑版这里行为对齐（电脑版是鼠标悬停触发，手机版是点选触发）
+
+### 2026-11-02 全部更新：桌面 v1.5 + 手机 v1.1（孪魂修正）
+
+- 提交 `1bc2b1a` 已推 main：孪魂按 wiki 重写 + `ghost_info.js` 重生成 + 版本号 1.5 / 安卓 1.1
+- 桌面版：`gh release create v1.5 dist/phasmophobia-journal-v1.5-win64.zip`，现为 `releases/latest`
+- 手机版：`gh release create mobile-v1.1 dist/phasmophobia-journal-mobile-v1.1.apk --latest=false`，
+  README 手机版链接同步改到 `mobile-v1.1`
+- **旧 release `mobile-v1.0` 已删**（`--cleanup-tag`，连 tag 一起），因为里面的 APK 是孪魂旧数据；
+  以后手机版更新沿用「新建 mobile-vX.Y + 删掉上一版」，别在同一个 release 上换资产
+- 私人「原版素材」版同步：`ghost_info.js` 覆盖、`version.py` → `1.5-原版素材`、
+  重打 `dist\恐鬼症笔记 v1.5-原版素材-分享.zip`（18.2 MB），**不上传任何地方**
+- 推送时 hosts 里 github.com 又失效：`curl` 走 140.82.113.4 能连上但 HTTP 请求卡住，
+  而 `git ls-remote` / `git push` 加 `http.curloptResolve` 正常，`gh api` 也正常——照旧用 `-c http.curloptResolve`
