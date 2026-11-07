@@ -832,3 +832,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\diagnose_black_window.
   重打 `dist\恐鬼症笔记 v1.5-原版素材-分享.zip`（18.2 MB），**不上传任何地方**
 - 推送时 hosts 里 github.com 又失效：`curl` 走 140.82.113.4 能连上但 HTTP 请求卡住，
   而 `git ls-remote` / `git push` 加 `http.curloptResolve` 正常，`gh api` 也正常——照旧用 `-c http.curloptResolve`
+
+### 2026-11-07 手机版：鬼名顺序对齐桌面版 + 证据页加重置
+
+- **鬼名顺序**：桌面版 `.ghost-grid` 是 `grid-auto-flow: column`（3 列 × 10 行，先竖着填满一列），
+  手机版原来是默认的横向填充，所以两边读起来顺序不一样。手机版 `.ghost-grid` 补上
+  `grid-template-rows: repeat(10, auto); grid-auto-flow: column;`，DOM 顺序没动（30 只没变），只改排版方向
+- **重置按钮**：证据页页脚改成一行（左边提示、右边「重置」），`#resetBtn` → `resetAll()`：
+  七条证据全部回 normal、清 `crossedGhosts`、清 `selectedName`、清鬼名的 selected/crossed、重跑
+  `applyFilter()` 与 `applyEvidenceDim()`。桌面版的重置逻辑在 `app/app.js` 的 `resetAll()`
+- 验证（headless Edge 412×915）：`flow=column`、第 1 只与第 2 只同一列且纵向排列、第 10 只仍在第一列、
+  第 11 只换到第二列顶；重置前 2 勾选/1 选中/4 变淡 → 重置后 0/0/0
+- APK 重打：`android\恐鬼症笔记.apk`，versionCode **3** / versionName **1.2**（`aapt2 dump badging` 已确认）

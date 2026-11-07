@@ -139,6 +139,37 @@ html, body {
   text-align: center;
 }
 
+/* 页脚一行：左边提示、右边重置按钮 */
+.page-foot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.page-foot-row .page-foot {
+  margin: 0;
+  text-align: left;
+}
+
+.reset-btn {
+  flex: 0 0 auto;
+  padding: 7px 16px;
+  border: 1px solid rgba(74, 48, 26, .38);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .2);
+  font-family: inherit;
+  font-size: 15px;
+  letter-spacing: .1em;
+  color: var(--ink);
+  transition: background .15s;
+}
+
+.reset-btn:active {
+  background: rgba(90, 60, 30, .22);
+}
+
 /* ---------- 证据 ---------- */
 .evidence-list {
   list-style: none;
@@ -198,9 +229,13 @@ html, body {
 }
 
 /* ---------- 鬼名 ---------- */
+/* 按桌面版同样的顺序排：3 列 × 10 行、先竖着填满一列再换列
+   （桌面 app/styles.css 的 .ghost-grid 就是 grid-auto-flow: column） */
 .ghost-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(10, auto);
+  grid-auto-flow: column;
   gap: 8px;
 }
 

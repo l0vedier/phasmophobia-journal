@@ -179,6 +179,23 @@
     applyEvidenceDim();
   }
 
+  /* ---------------- 重置（证据页右下角） ---------------- */
+  function resetAll() {
+    EVIDENCE.forEach(item => {
+      evState.set(item.key, "normal");
+      item.el.classList.remove("checked", "crossed");
+    });
+    crossedGhosts.clear();
+    selectedName = null;
+    GHOSTS.forEach(x => {
+      x.el.classList.remove("selected", "crossed");
+    });
+    applyFilter();
+    applyEvidenceDim();
+  }
+
+  $("resetBtn").addEventListener("click", resetAll);
+
   /* 选中某只鬼时，证据页里不属于它的那几条变淡 */
   function applyEvidenceDim() {
     const g = selectedName ? GHOSTS.find(x => x.name === selectedName) : null;
