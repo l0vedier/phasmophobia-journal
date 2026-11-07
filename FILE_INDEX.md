@@ -844,3 +844,6 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\diagnose_black_window.
 - 验证（headless Edge 412×915）：`flow=column`、第 1 只与第 2 只同一列且纵向排列、第 10 只仍在第一列、
   第 11 只换到第二列顶；重置前 2 勾选/1 选中/4 变淡 → 重置后 0/0/0
 - APK 重打：`android\恐鬼症笔记.apk`，versionCode **3** / versionName **1.2**（`aapt2 dump badging` 已确认）
+- 已发布：提交 `aabbc5c` 推 main；`gh release create mobile-v1.2 ... --latest=false`，
+  README 链接改到 v1.2；旧 `mobile-v1.1` 连 tag 一起删除。下载链接实测 200、4,912,461 字节，
+  与本地 `android\恐鬼症笔记.apk` md5 一致（`db9b39c3…`）
