@@ -871,3 +871,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\diagnose_black_window.
   「通灵板 29 / 塔罗牌 10 / 猴爪 10 条子项都在」。全部通过。
 - APK 重打：`android\恐鬼症笔记.apk`，versionCode **4** / versionName **1.3**，签名不变（同一 keystore）。
   打完先给用户真机验，**没有发 GitHub**；确认后再按老流程发 `mobile-v1.3` 并删 v1.2。
+- 已发布：`gh release create mobile-v1.3 dist/phasmophobia-journal-mobile-v1.3.apk --latest=false`，
+  旧 `mobile-v1.2` 连 tag 一起删除；README 手机版链接改到 v1.3。
+- **注意**：2026-11-25 当天 `github.com`（git push / release 下载）连不上，只有 `api.github.com` 通，
+  所以 README 是用 `gh api -X PUT repositories/.../contents/README.md` 直接提交的（commit `0613988`）。
+  本地因此多出一条内容相同的 README 提交，**等 github.com 恢复后执行 `git fetch origin && git reset --hard origin/main` 对齐**。
+
+### 2026-11-25 桌面版：雷兽/捣蛋鬼的鬼名被挤成竖排
+
+- 症状：鬼魂详情里「雷兽」「捣蛋鬼」的名字一字一行竖着排，名字后面还多出一截「资料名：雷魂 / 资料名：骚灵」。
+- 根因：`.detail-head` 是 flex 行（标题 + 副标题 + 英文名 + 返回），`.detail-title` 默认允许收缩；
+  只有这两只鬼的**资料名和游戏名不同**，副标题多出「资料名：xxx」把标题挤窄，中文就一字一行折行。
+  其他 28 只用 `section.name === name`，没有副标题，所以不出现。
+- 修法：`.detail-title` 加 `flex: 0 0 auto; white-space: nowrap`；「资料里的名字：xxx」从标题行移到
+  正文第一行（`.detail-note`，小字淡色）；同名时才显示 alias（`又名捣蛋鬼` 在标题是游戏名时是重复的）。
+- `tools/test_ui.mjs` 里两条过期断言一并修正：`#detailSub` → `#detailSubText`、英文名改查 `#detailEn`、
+  「资料名」改查正文。全套 160 项 ALL PASS。
