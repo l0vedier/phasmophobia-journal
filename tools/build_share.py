@@ -25,7 +25,7 @@ from version import APP_NAME, APP_VERSION  # noqa: E402
 DIST = BASE / "dist"
 TARGET = DIST / APP_NAME
 BUILD = BASE / "build"
-GHOST_MD = Path(r"D:\game_timer\资料\恐鬼症_鬼魂数据_分鬼版.md")
+GHOST_MD = Path(r"D:\恐鬼症工具\资料\恐鬼症_鬼魂数据_分鬼版.md")
 
 README = f"""恐鬼症笔记 v{APP_VERSION} 使用说明
 

@@ -2,7 +2,7 @@
 """鬼魂资料解析 / JS API / 兜底数据的一致性测试。
 
 用法：python tools/test_ghost_info.py
-只读 D:\\game_timer\\资料\\恐鬼症_鬼魂数据_分鬼版.md，不写源文件。
+只读 D:\\恐鬼症工具\\资料\\恐鬼症_鬼魂数据_分鬼版.md，不写源文件。
 """
 from __future__ import annotations
 

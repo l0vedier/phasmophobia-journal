@@ -729,6 +729,10 @@
   }
 
   .detail-title {
+    /* 鬼名永远不折行、不被旁边的「资料名：xxx」挤窄：flex 里默认允许收缩，
+       一旦副标题（资料名：雷魂 / 资料名：骚灵）占位，标题就被挤成一字一行（竖排）。 */
+    flex: 0 0 auto;
+    white-space: nowrap;
     margin: 0;
     font-size: 5.6cqh;
     line-height: 1.05;
@@ -863,6 +867,14 @@
     font-size: 2.4cqh;
     line-height: 1.5;
     color: var(--ink-mid);
+  }
+
+  .detail-note {
+    margin: 0 0 1.0cqh;
+    font-size: 1.9cqh;
+    line-height: 1.4;
+    color: #6a4a2c;
+    opacity: .62;
   }
 
   .detail-source {

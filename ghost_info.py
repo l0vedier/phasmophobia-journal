@@ -3,7 +3,7 @@
 
 数据源：优先找程序旁边的 资料\\恐鬼症_鬼魂数据_分鬼版.md
 （打包后朋友可以直接改这一份），找不到再退回开发机的
-D:\\game_timer\\资料\\恐鬼症_鬼魂数据_分鬼版.md。
+D:\\恐鬼症工具\\资料\\恐鬼症_鬼魂数据_分鬼版.md。
 界面通过 Api.get_ghost_info() 在启动/首次打开详情页时取一次；
 另外 tools/gen_ghost_info.py 会把同一份解析结果写成 app/ghost_info.js，
 作为没有 pywebview API 时（无头测试）的兜底。
@@ -26,7 +26,7 @@ import sys
 from pathlib import Path
 
 GHOST_MD_NAME = "恐鬼症_鬼魂数据_分鬼版.md"
-GHOST_MD = Path(r"D:\game_timer\资料") / GHOST_MD_NAME
+GHOST_MD = Path(r"D:\恐鬼症工具\资料") / GHOST_MD_NAME
 
 
 def default_ghost_md() -> Path:

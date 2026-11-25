@@ -246,7 +246,49 @@
         p.innerHTML = mdInline(field.text);
         container.appendChild(p);
       }
+      // 字段下的缩进子项（通灵板「问题与代价」13 条、塔罗牌 10 张、猴爪 10 个愿望…）
+      // 以前手机版整块漏掉了，只显示一个空标题——用户反馈的「内容不全」就是这里
+      const subs = Array.isArray(field.sub) ? field.sub : [];
+      if (subs.length) {
+        const ul = document.createElement("ul");
+        ul.className = "sub-list";
+        subs.forEach(sub => {
+          const li = document.createElement("li");
+          if (sub.label) {
+            const strong = document.createElement("strong");
+            strong.textContent = sub.label;
+            li.appendChild(strong);
+            li.appendChild(document.createTextNode("："));
+          }
+          if (sub.text) {
+            const span = document.createElement("span");
+            span.innerHTML = mdInline(sub.text);
+            li.appendChild(span);
+          }
+          ul.appendChild(li);
+        });
+        container.appendChild(ul);
+      }
     });
+  }
+
+  /* 浮层正文的高度不能只靠百分比撑：部分 WebView 解析不了纸面的 max-height:92%，
+     正文区就会长出屏幕下面，滚动条的尽头跑到屏幕外，现象是「能拖但后面的字永远看不到」。
+     打开时按浮层**实测高度**给正文区定死 max-height，任何内核都滚得动。 */
+  function fitSheet(sheetEl, bodyEl) {
+    const paper = sheetEl.querySelector(".sheet-paper");
+    const head = sheetEl.querySelector(".sheet-head");
+    if (!paper || !head) return;
+    const cs = window.getComputedStyle(paper);
+    const padY = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    const sheetH = sheetEl.clientHeight || window.innerHeight || 640;
+    const avail = Math.floor(sheetH * 0.92) - head.offsetHeight - padY - 6;
+    bodyEl.style.maxHeight = Math.max(120, avail) + "px";
+  }
+
+  function fitOpenSheets() {
+    if (ghostSheet.classList.contains("open")) fitSheet(ghostSheet, sheetBody);
+    if (cursedSheet.classList.contains("open")) fitSheet(cursedSheet, cursedSheetBody);
   }
 
   function openGhostSheet(name) {
@@ -257,6 +299,7 @@
     sheetBody.scrollTop = 0;
     ghostSheet.classList.add("open");
     ghostSheet.setAttribute("aria-hidden", "false");
+    fitSheet(ghostSheet, sheetBody);
   }
 
   function closeGhostSheet() {
@@ -274,11 +317,20 @@
     cursedSheetBody.scrollTop = 0;
     cursedSheet.classList.add("open");
     cursedSheet.setAttribute("aria-hidden", "false");
+    fitSheet(cursedSheet, cursedSheetBody);
   }
 
   function closeCursedSheet() {
     cursedSheet.classList.remove("open");
     cursedSheet.setAttribute("aria-hidden", "true");
+  }
+
+  window.addEventListener("resize", fitOpenSheets);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", fitOpenSheets);
+  }
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(fitOpenSheets, () => {});
   }
 
   $("sheetBack").addEventListener("click", closeGhostSheet);

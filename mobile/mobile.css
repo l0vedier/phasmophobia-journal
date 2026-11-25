@@ -354,6 +354,7 @@ html, body {
   background: rgba(10, 6, 3, .45);
   opacity: 0;
   visibility: hidden;
+  overflow: hidden;             /* 纸面再高也裁在这一层里，别伸到屏幕外 */
   transition: opacity .22s, visibility .22s;
 }
 
@@ -367,6 +368,7 @@ html, body {
   max-height: 92%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   padding: 16px 20px calc(12px + env(safe-area-inset-bottom));
   border-radius: 16px 16px 0 0;
   background: url("assets/parchment_tile.png") repeat;
@@ -414,9 +416,10 @@ html, body {
 
 .sheet-body {
   flex: 1 1 auto;
+  min-height: 0;                /* 老 WebView：flex 子项默认不收缩，正文会把纸面顶出屏幕 */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding-top: 10px;
+  padding: 10px 2px 16px;       /* 底部留一点，最后一行别贴着系统导航栏 */
   overscroll-behavior: contain;
 }
 
@@ -438,6 +441,33 @@ html, body {
 }
 
 .sheet-body strong { color: var(--ink); }
+
+/* 字段下的子项列表（通灵板问题表、塔罗牌、猴爪愿望） */
+.sheet-body .sub-list {
+  margin: 2px 0 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.sheet-body .sub-list li {
+  position: relative;
+  margin: 0 0 7px;
+  padding-left: 15px;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.sheet-body .sub-list li::before {
+  content: "·";
+  position: absolute;
+  left: 2px;
+  top: 0;
+  color: var(--ink-faint);
+}
+
+.sheet-body .sub-list li:last-child { margin-bottom: 0; }
+.sheet-body .sub-list strong { color: var(--ink); }
 
 /* ---------- 从底部翻上来的通用规则（整页） ---------- */
 .drawer-backdrop {

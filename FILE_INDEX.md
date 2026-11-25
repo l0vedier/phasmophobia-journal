@@ -13,7 +13,7 @@
 | `applog.py` | 滚动日志：`%APPDATA%\PhasmophobiaJournal\journal.log`（512 KB × 2 份备份） |
 | `layout.py` | 窗口/书壳几何常量，`main.py` 与真实窗口测试共用 |
 | `hotkey.py` | 全局 Ctrl+J：最小化 / 唤回；动态置顶；补 `WS_MINIMIZEBOX` 让任务栏按钮能最小化；任务栏第一次点击直接隐藏置顶笔记；点窗口外面就收起（Deactivate 延迟 0.2s 复核）；保存并还原最小化前的窗口矩形 |
-| `ghost_info.py` | 只读解析鬼魂资料 md：鬼魂、通用规则、诅咒之物（含 `###` 子项）；优先用程序/exe 旁的 `资料\恐鬼症_鬼魂数据_分鬼版.md`，找不到才回退 `D:\game_timer\资料\...` |
+| `ghost_info.py` | 只读解析鬼魂资料 md：鬼魂、通用规则、诅咒之物（含 `###` 子项）；优先用程序/exe 旁的 `资料\恐鬼症_鬼魂数据_分鬼版.md`，找不到才回退 `D:\恐鬼症工具\资料\...` |
 | `app/index.html` | 界面结构（HTML）：左页证据 + 鬼魂通用规则 + 诅咒之物规则，右页鬼名 + 鬼魂详情 + 诅咒之物名录/详情；样式和脚本拆到下面两个文件 |
 | `app/styles.css` | 全部界面样式：cqh/vw 布局、皮面书壳、通用规则页、诅咒之物页、淡入淡出、翻页动画 |
 | `app/app.js` | 交互状态机、30 只鬼的圈选/划除数据、证据筛选、详情渲染、左右页切换、诅咒之物翻页/淡入淡出、翻页动画、窗口 API 调用 |
@@ -35,6 +35,7 @@
 | `tools/test_ui.mjs` | 无头 Edge 自动化布局/交互测试（CDP，无 npm 依赖，160 项；固定用 `?noflip=1`） |
 | `tools/test_flip.mjs` | 无头 Edge 翻页动画专项测试（CDP，31 项）：正/反翻方向、快照内容、起止对齐、翻页中保护、最终状态 |
 | `tools/test_cursed.mjs` | 诅咒之物专项测试（CDP，33 项）：第二页翻页、7 件物品、左右页布局、名字淡出/淡入介绍、返回、无重置入口、Esc、减少动态效果 |
+| `tools/test_mobile_sheet.mjs` | 手机版浮层回归（CDP + 真实触摸，4 种手机视口）：正文区必须在屏幕内、触摸能滚到真正最后一行、通灵板 29 条 / 塔罗牌 10 / 猴爪 10 条子项必须全部渲染 |
 | `tools/test_window_features.py` | 真实窗口测试：透明、点击穿透、圆角书壳区域、顶部拖动、Ctrl+J 最小化/唤回（25 项） |
 | `tools/test_drag_scroll.mjs` | 针对性测试：长页面按住鼠标拖动滚动（6 项，headless Edge + CDP 真鼠标事件） |
 | `tools/test_taskbar_hide.py` | 针对性任务栏测试：活动窗口点按钮隐藏 / 第一次点击隐藏 / 恢复不反弹 / 普通程序切前台 / 游戏前台 Ctrl+J / 快速连按不吞键（24 项） |
@@ -69,7 +70,7 @@ mask、书脊阴影、圆角一个都不用改。
 | `book_spread.png` | 895×715 RGBA，奶油纸底 + 右页淡格线 + 中缝 + 撕纸边；同时当 alpha 遮罩用 | `Bookpages_696.png` |
 | `parchment_tile.png` | 512×512 可无缝平铺的纸纤维 | `Book_BC_2291.png` 裁切 |
 | `leather.png` | 1024 深棕粒面皮革（Worley 细胞噪声） | `Journal_Leather_..._2559.png` 缩到 1024 |
-| `ghost.ico` | 深棕圆角底 + 奶油小幽灵，16/32/48/64/128/256 | `D:\game_timer\ghost_icon.ico` |
+| `ghost.ico` | 深棕圆角底 + 奶油小幽灵，16/32/48/64/128/256 | `D:\恐鬼症工具\ghost_icon.ico` |
 | `LongCang-Regular.ttf` | 不变，SIL OFL 1.1，许可证 `app/assets/OFL.txt` | 游戏内同名字体 |
 
 调色记录：渲染后与旧素材比对，左右页平均色差 ≤2 个色阶（左 243.5/241.7/199.2 对 245.4/241.4/199.6）。
@@ -94,7 +95,7 @@ mask、书脊阴影、圆角一个都不用改。
 ## 鬼魂资料（左页通用规则 + 右页详情，2026-10-21）
 
 - **数据源（只读）**：优先读程序/exe 旁边的 `资料\恐鬼症_鬼魂数据_分鬼版.md`；开发机上没有时
-  回退 `D:\game_timer\资料\恐鬼症_鬼魂数据_分鬼版.md`。由用户维护；程序不写这个文件，也不碰
+  回退 `D:\恐鬼症工具\资料\恐鬼症_鬼魂数据_分鬼版.md`。由用户维护；程序不写这个文件，也不碰
   `资料` 目录里的其他东西。2026-10-21 解析结果：30 只鬼、244 个字段、13 条通用规则。
 - `ghost_info.py::load_ghost_info()` 每次调用都现读 Markdown；`main.py::Api.get_ghost_info()`
   把它暴露给 JS。界面在 `pywebviewready`（以及首次右键）时取一次，成功后本次启动不再重读；
@@ -748,7 +749,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\diagnose_black_window.
 
 ### 2026-11-02 资料修正：孪魂「互动间隔」不是 2 秒
 
-- 用户核对分鬼版后问来源，查出 `D:\game_timer\资料\恐鬼症_鬼魂数据_分鬼版.md` 孪魂一节把两件事缝错了：
+- 用户核对分鬼版后问来源，查出 `D:\恐鬼症工具\资料\恐鬼症_鬼魂数据_分鬼版.md` 孪魂一节把两件事缝错了：
   wiki「指南_辨别鬼魂特征」第 76 行的原文是「孪魂偶尔会通过两种互动范围**几乎同时（1 秒之内）**进行互动」，
   而「所有鬼魂都能以**约 2 秒**的间隔与多个物品交互」说的是普通鬼的通用节奏
 - 已改两处：特征栏「两次互动能在 **1 秒之内**完成（普通鬼约 2 秒一次互动）」；
@@ -847,3 +848,26 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\diagnose_black_window.
 - 已发布：提交 `aabbc5c` 推 main；`gh release create mobile-v1.2 ... --latest=false`，
   README 链接改到 v1.2；旧 `mobile-v1.1` 连 tag 一起删除。下载链接实测 200、4,912,461 字节，
   与本地 `android\恐鬼症笔记.apk` md5 一致（`db9b39c3…`）
+
+### 2026-11-25 手机版 v1.3：诅咒物详情「滚不到底 + 内容不全」
+
+用户真机反馈：诅咒物详情有的内容直接看不到，通灵板能上下拖但内容也不全，怀疑还有内容在下面拖不到。查到**两个独立问题**：
+
+1. **子项整块没渲染（内容不全的真正原因）**：资料里字段下的缩进 `-` 子项被解析进 `field.sub`
+   （通灵板 29 条：碎裂 4 / 问题与代价 13 / 常用问法 12；塔罗牌 10；猴爪 10），
+   桌面版 `app/app.js` 会画成 `.detail-sublist`，**手机版 `renderFields()` 只画了标题和正文，把 sub 丢了**——
+   所以「问题与代价」后面是空的。现在手机版用同样的 `markdown 粗体 + "label：" + 正文` 结构画成
+   `.sub-list`，样式见 `mobile.css` 的「字段下的子项列表」。
+2. **正文区可能伸出屏幕下面（滚不到底）**：浮层纸面只靠 `max-height: 92%`、正文区靠 flex 自动收缩，
+   部分 WebView 解析不了百分比 / flex 子项不收缩，正文区就会长出屏幕下面，滚动条的尽头在屏幕外，
+   现象是「能拖但最后几行永远看不到」。修法不依赖任何设备参数：
+   - `mobile.js` 的 `fitSheet()`：打开浮层时按 `sheet.clientHeight` **实测**算可用高度，
+     给正文区写死 `max-height`（px），任何内核都滚得动；`resize` / `visualViewport.resize` /
+     `document.fonts.ready` 时重算
+   - `mobile.css` 兜底：`.sheet` 与 `.sheet-paper` 都 `overflow: hidden`、`.sheet-body` 加 `min-height: 0`，
+     底部 padding 留 16px（最后一行别贴系统导航栏）
+- 回归测试：`node tools/test_mobile_sheet.mjs` —— 390×844 / 360×640 / 320×568 / 412×915 四种视口，
+  7 件诅咒物 + 鬼魂长按浮层，用 CDP 真实触摸上滑，断言「正文区底边在屏幕内」「滚到最后一行仍然可见」
+  「通灵板 29 / 塔罗牌 10 / 猴爪 10 条子项都在」。全部通过。
+- APK 重打：`android\恐鬼症笔记.apk`，versionCode **4** / versionName **1.3**，签名不变（同一 keystore）。
+  打完先给用户真机验，**没有发 GitHub**；确认后再按老流程发 `mobile-v1.3` 并删 v1.2。

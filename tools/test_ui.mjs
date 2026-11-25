@@ -670,7 +670,8 @@ try {
       titleRect: r(q('#detailTitle')),
       backRect: r(back),
       fieldRect: r(detail.querySelector('.detail-field h3')),
-      sub: q('#detailSub').textContent,
+      sub: q('#detailSubText').textContent,
+      en: q('#detailEn').textContent,
       fields: [...detail.querySelectorAll('.detail-field h3')].map(e => e.textContent),
       strongCount: body.querySelectorAll('strong').length,
       text: body.innerText,
@@ -710,8 +711,8 @@ try {
   check("detail title aligns with the 证据 field",
     near(D.titleRect.x, D.fieldRect.x, 1.5),
     `${D.titleRect.x} vs ${D.fieldRect.x}`);
-  check("detail title is the clicked ghost", D.title === "加鲁" && D.sub.includes("Gallu"),
-    JSON.stringify({ title: D.title, sub: D.sub }));
+  check("detail title is the clicked ghost", D.title === "加鲁" && D.en.includes("Gallu"),
+    JSON.stringify({ title: D.title, en: D.en }));
   const galluFields = await evaluate(`
     return window.GHOST_INFO_FALLBACK.ghosts.find(g => g.name === '加鲁').fields.map(f => f.label);
   `);
@@ -790,13 +791,13 @@ try {
     await rightClickGhost(display);
     const A = await evaluate(`return {
       title: document.getElementById('detailTitle').textContent,
-      sub: document.getElementById('detailSub').textContent,
+      sub: document.getElementById('detailSubText').textContent,
       text: document.getElementById('detailBody').innerText,
       fields: document.querySelectorAll('#detailBody .detail-field').length
     };`);
     const subOk = expected === display
-      ? !A.sub.includes("资料名：")
-      : A.sub.includes("资料名：" + expected);
+      ? !A.text.includes("资料里的名字：")
+      : A.text.includes("资料里的名字：" + expected);
     check(`${display} maps to ${expected}`,
       A.title === display && subOk && A.fields > 0,
       JSON.stringify({ title: A.title, sub: A.sub, fields: A.fields }));

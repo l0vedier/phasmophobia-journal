@@ -538,13 +538,16 @@
       detailBody.appendChild(warn);
     }
 
-    const bits = [];
+    // 资料里的名字和游戏名不同时（雷兽↔雷魂、捣蛋鬼↔骚灵），这条说明放进正文最上面。
+    // **不要放在标题行**：标题行是 flex，副标题一长就把鬼名挤成一字一行的竖排
     if (section.name !== name) {
-      bits.push("资料名：" + section.name);
-    } else if (section.alias) {
-      bits.push(section.alias);
+      const note = document.createElement("p");
+      note.className = "detail-note";
+      note.textContent = "资料里的名字：" + section.name;
+      detailBody.appendChild(note);
     }
-    detailSubText.textContent = bits.join(" · ");
+    // 资料名和游戏名不同时标题已经是游戏名，再写「又名捣蛋鬼」是重复，只在同名时用它
+    detailSubText.textContent = (section.name === name && section.alias) ? section.alias : "";
     // 英文名紧跟中文鬼名右侧，同一行；最右边留给「返回鬼名」
     detailEn.textContent = section.english || "";
 
