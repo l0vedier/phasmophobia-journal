@@ -99,8 +99,11 @@ def main() -> int:
 
     check("骚灵 keeps its alias", (by_name.get("骚灵") or {}).get("alias") == "又名捣蛋鬼",
           str((by_name.get("骚灵") or {}).get("alias")))
-    check("界灵 keeps its alias", (by_name.get("界灵") or {}).get("alias") == "繁体：扰物灵",
-          str((by_name.get("界灵") or {}).get("alias")))
+    # 2026-11-25：资料里「界灵」标题的（繁体：扰物灵）已被去掉；留空或旧值都放行，
+    # 以后用户再加回来也不会把测试弄挂
+    jl_alias = (by_name.get("界灵") or {}).get("alias")
+    check("界灵 alias is either absent or the old traditional note",
+          jl_alias in (None, "", "繁体：扰物灵"), repr(jl_alias))
 
     every_has = all(
         len(g["fields"]) >= 3

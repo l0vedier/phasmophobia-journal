@@ -900,3 +900,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\diagnose_black_window.
   （「界灵 keeps its alias」和「app/ghost_info.js is in sync」），与本次改名无关。
 - 安卓 APK 重打：versionCode **5** / versionName **1.4**，`dist\phasmophobia-journal-mobile-v1.4.apk`，
   包内 `assets/mobile.js` md5 与仓库一致（已确认含「雷魂」、不含「雷兽」）。**尚未发布到 GitHub。**
+
+### 2026-11-25 手机版 v1.4 发布 + 内置资料同步
+
+- 名字统一「雷魂」后重打 APK：versionCode 5 / versionName 1.4；已发 `mobile-v1.4`，
+  `mobile-v1.3` 连同 tag 删除，README 链接改到 v1.4。
+- **内置资料重新生成**：`python tools/gen_ghost_info.py` → `app/ghost_info.js`，再原样复制到
+  `mobile/ghost_info.js`（两份 md5 必须一致）。实际内容只变了 `source` 路径（D:\game_timer → D:\恐鬼症工具），
+  鬼魂/诅咒物条目不变。`test_ghost_info.py` 的「app/ghost_info.js is in sync」由 FAIL 变 PASS。
+- `test_ghost_info.py` 的「界灵 keeps its alias」是**资料文件里这条注记已被删掉**导致的，
+  改成「留空或旧值（繁体：扰物灵）都放行」，不再误报。
+- 全套测试：test_ghost_info ALL PASS、test_ui ALL PASS、test_cursed ALL PASS、test_mobile_sheet 全部通过。
