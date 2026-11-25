@@ -786,8 +786,8 @@ try {
     JSON.stringify({ selected: S.selected, paths: S.pathCount, circle: S.circle }));
 
   console.log("\n[12c] journal names map to the data-file names");
-  const aliasKeywords = { "达彦": "特殊加速", "捣蛋鬼": "成片抛掷", "雷兽": "电子设备" };
-  for (const [display, expected] of [["达彦", "达彦"], ["捣蛋鬼", "骚灵"], ["雷兽", "雷魂"]]) {
+  const aliasKeywords = { "达彦": "特殊加速", "捣蛋鬼": "成片抛掷", "雷魂": "电子设备" };
+  for (const [display, expected] of [["达彦", "达彦"], ["捣蛋鬼", "骚灵"], ["雷魂", "雷魂"]]) {
     await rightClickGhost(display);
     const A = await evaluate(`return {
       title: document.getElementById('detailTitle').textContent,
@@ -810,7 +810,7 @@ try {
   console.log("\n[12d] all 30 ghosts resolve to complete field lists");
   const coverage = await evaluate(`
     const fallback = window.GHOST_INFO_FALLBACK;
-    const aliases = { "捣蛋鬼": "骚灵", "雷兽": "雷魂" };
+    const aliases = { "捣蛋鬼": "骚灵" };
     const expected = Object.fromEntries(fallback.ghosts.map(g => [g.name, g.fields.map(f => f.label)]));
     const names = [...document.querySelectorAll('.ghost')].map(g => g.dataset.name);
     const bad = [];

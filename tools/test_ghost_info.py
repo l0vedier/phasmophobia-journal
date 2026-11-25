@@ -77,9 +77,9 @@ def main() -> int:
     journal = [
         "阿斯旺", "界灵", "加鲁", "巨灵", "魔洛伊", "奥班博", "幻影", "亡魂", "刹耶", "魅影",
         "女妖", "恶魔", "御灵", "盲灵", "鬼婴", "赤鬼", "捣蛋鬼", "暗影", "拟魂", "妖怪",
-        "达彦", "雾影", "寒魔", "梦魇", "幻妖", "怨灵", "雷兽", "魂魄", "孪魂", "幽灵",
+        "达彦", "雾影", "寒魔", "梦魇", "幻妖", "怨灵", "雷魂", "魂魄", "孪魂", "幽灵",
     ]
-    aliases = {"捣蛋鬼": "骚灵", "雷兽": "雷魂"}
+    aliases = {"捣蛋鬼": "骚灵"}
     missing = [n for n in journal if (aliases.get(n, n)) not in by_name]
     check("all 30 journal names resolve", not missing, str(missing))
 

@@ -120,9 +120,10 @@ mask、书脊阴影、圆角一个都不用改。
   常规字重笔画细，右页正文改用主墨色 `--ink` 并加 `text-shadow: 0 .35px 0 rgba(30,15,4,.24)`；
   左页通用规则也用 `--ink` + 同样的轻微墨迹阴影，每段前是一条淡棕短横线。
   副标题仍是 `--ink-soft / .9`。**不要改回 `--ink-mid` / 浅棕 + 低透明度**，否则整段又会发虚。
-- **名字映射**：游戏界面名 → md 章节名：`捣蛋鬼 → 骚灵`、`雷兽 → 雷魂`。其余 28 个同名。
-  2026-10-19 用户把 md 章节名从 `达魇` 改成了 `达彦`，因此 `达彦` 的映射已删除；不要再擅自改回。
-  标题仍显示界面名，只有章节名不同时副标题才注明「资料名：xxx」。
+- **名字映射**：游戏界面名 → md 章节名：只剩 `捣蛋鬼 → 骚灵`，其余 29 个同名。
+  2026-11-25 用户决定统一用「雷魂」，界面名已由「雷兽」改为「雷魂」，对应映射随之删除；
+  2026-10-19 用户把 md 章节名从 `达魇` 改成了 `达彦`，因此 `达彦` 的映射也已删除；都不要再擅自改回。
+  标题仍显示界面名，只有章节名不同时正文第一行才注明「资料里的名字：xxx」。
 - **层级**：详情打开时 `.page-right` 抬到 `z-index:70`（顶部拖动区是 60），否则页内左上角的
   返回按钮会被拖动区挡住；翻页快照层是 90，关闭按钮 `.chrome` 是 100。左页顶部仍可拖动窗口。
   **不要删这个 z-index 规则。**
@@ -887,3 +888,15 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\diagnose_black_window.
   正文第一行（`.detail-note`，小字淡色）；同名时才显示 alias（`又名捣蛋鬼` 在标题是游戏名时是重复的）。
 - `tools/test_ui.mjs` 里两条过期断言一并修正：`#detailSub` → `#detailSubText`、英文名改查 `#detailEn`、
   「资料名」改查正文。全套 160 项 ALL PASS。
+
+### 2026-11-25 名字统一：雷兽 → 雷魂
+
+- 用户决定全应用统一用「雷魂」（游戏本地化里简体叫「雷兽」、繁体叫「雷魂」；用户选后者）。
+  `app/app.js` 与 `mobile/mobile.js` 的 `GHOSTS` 改名，`GHOST_MD_ALIASES` 里 `雷兽→雷魂` 删除，
+  现在只剩 `捣蛋鬼 → 骚灵` 一条映射。
+- 详情页不再出现「资料里的名字」小字（名字已和 md 一致）。
+- 测试同步：`tools/test_ui.mjs`、`tools/test_ghost_info.py` 里的「雷兽」全部改成「雷魂」。
+  `test_ui.mjs` 全套通过；`test_ghost_info.py` 仍有两个**改动前就存在**的失败
+  （「界灵 keeps its alias」和「app/ghost_info.js is in sync」），与本次改名无关。
+- 安卓 APK 重打：versionCode **5** / versionName **1.4**，`dist\phasmophobia-journal-mobile-v1.4.apk`，
+  包内 `assets/mobile.js` md5 与仓库一致（已确认含「雷魂」、不含「雷兽」）。**尚未发布到 GitHub。**

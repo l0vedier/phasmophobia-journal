@@ -41,13 +41,13 @@
     { name: "梦魇",   ev: ["BOX", "ORB", "WRITING"] },
     { name: "幻妖",   ev: ["EMF5", "UV", "ORB"] },
     { name: "怨灵",   ev: ["BOX", "ORB", "FREEZE"] },
-    { name: "雷兽",   ev: ["EMF5", "ORB", "DOTS"] },
+    { name: "雷魂",   ev: ["EMF5", "ORB", "DOTS"] },
     { name: "魂魄",   ev: ["EMF5", "WRITING", "BOX"] },
     { name: "孪魂",   ev: ["EMF5", "BOX", "FREEZE"] },
     { name: "幽灵",   ev: ["ORB", "FREEZE", "DOTS"] }
   ];
 
-  const GHOST_MD_ALIASES = { "捣蛋鬼": "骚灵", "雷兽": "雷魂" };
+  const GHOST_MD_ALIASES = { "捣蛋鬼": "骚灵" };
 
   const PAGE_NAMES = ["证据", "鬼魂", "诅咒之物"];
 

@@ -42,7 +42,7 @@
     { name: "梦魇",   ev: ["BOX", "ORB", "WRITING"] },
     { name: "幻妖",   ev: ["EMF5", "UV", "ORB"] },
     { name: "怨灵",   ev: ["BOX", "ORB", "FREEZE"] },
-    { name: "雷兽",   ev: ["EMF5", "ORB", "DOTS"] },
+    { name: "雷魂",   ev: ["EMF5", "ORB", "DOTS"] },
     { name: "魂魄",   ev: ["EMF5", "WRITING", "BOX"] },
     { name: "孪魂",   ev: ["EMF5", "BOX", "FREEZE"] },
     { name: "幽灵",   ev: ["ORB", "FREEZE", "DOTS"] }
@@ -50,8 +50,7 @@
 
   /* ---- 资料里几个名字和游戏界面不同，按这张表找章节 ---- */
   const GHOST_MD_ALIASES = {
-    "捣蛋鬼": "骚灵",
-    "雷兽": "雷魂"
+    "捣蛋鬼": "骚灵"
   };
 
   const evidenceList = document.getElementById("evidenceList");
@@ -538,7 +537,7 @@
       detailBody.appendChild(warn);
     }
 
-    // 资料里的名字和游戏名不同时（雷兽↔雷魂、捣蛋鬼↔骚灵），这条说明放进正文最上面。
+    // 资料里的名字和游戏名不同时（捣蛋鬼↔骚灵），这条说明放进正文最上面。
     // **不要放在标题行**：标题行是 flex，副标题一长就把鬼名挤成一字一行的竖排
     if (section.name !== name) {
       const note = document.createElement("p");
